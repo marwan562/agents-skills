@@ -1,6 +1,6 @@
 # agents-skills
 
-A curated collection of reusable **Agent Skills** for AI coding agents. Production-ready, open-source, and compatible with the [Agent Skills](https://skills.sh) ecosystem and tools like [OpenCode](https://opencode.ai), Claude Code, and others that support the `SKILL.md` specification.
+A curated collection of reusable **Agent Skills** for AI coding agents. Production-ready, open-source, and compatible with the [Agent Skills](https://skills.sh) ecosystem and tools like [OpenCode](https://opencode.ai), Claude Code, Antigravity, and others that support the `SKILL.md` specification.
 
 ## Why this project exists
 
@@ -14,18 +14,47 @@ Goals:
 
 ## Available Skills
 
-| Skill | Directory | Purpose |
-|-------|-----------|---------|
-| **project-architecture** | `skills/project-architecture/` | Design clean, scalable project architectures from requirements |
-| **code-review** | `skills/code-review/` | Systematic code review for correctness, security, performance, and maintainability |
-| **documentation** | `skills/documentation/` | Create and maintain accurate project documentation |
-| **contribution** | `skills/contribution/` | Guide contributors through the repository's contribution workflow |
-| **contribute** | `skills/contribute/` | End-to-end open-source contribution pipeline (issue → PR) for any repo/host/language |
-| **multi-agents** | `skills/multi-agents/` | Orchestrate complex tasks through parallel sub-agent collaboration |
+| Skill | Directory | Scope & Purpose |
+|---|---|---|
+| [**project-architecture**](skills/project-architecture/SKILL.md) | [`skills/project-architecture/`](skills/project-architecture/) | Design clean, scalable project architectures and module boundaries from requirements |
+| [**code-review**](skills/code-review/SKILL.md) | [`skills/code-review/`](skills/code-review/) | Systematic code review for correctness, security, performance, and maintainability |
+| [**documentation**](skills/documentation/SKILL.md) | [`skills/documentation/`](skills/documentation/) | Create and maintain accurate project documentation, changelogs, and API references |
+| [**contribution**](skills/contribution/SKILL.md) | [`skills/contribution/`](skills/contribution/) | Guide contributors specifically through *this* repository's (`agents-skills`) workflow |
+| [**contribute**](skills/contribute/SKILL.md) | [`skills/contribute/`](skills/contribute/) | Autonomous 12-step open-source contribution pipeline (issue → PR) for *any* repo, host, and language |
+| [**multi-agents**](skills/multi-agents/SKILL.md) | [`skills/multi-agents/`](skills/multi-agents/) | Orchestrate complex tasks through parallel sub-agent collaboration (research, implement, review) |
 
-> Each skill lives in its own directory under `skills/` and contains a single `SKILL.md`. This makes skills independently installable and versionable.
+> Each skill lives in its own directory under `skills/` and contains a single `SKILL.md` (and optional `references/` for extensive templates). This makes skills independently installable and versionable.
 
-See [`docs/architecture.md`](docs/architecture.md) for how the repository is organized.
+See [`docs/architecture.md`](docs/architecture.md) for detailed repository design, skill composition, and workflow architecture.
+
+---
+
+## Skill Composition & How Skills Work Together
+
+While every skill functions standalone, higher-level workflow skills coordinate with specialized companion skills for enhanced precision:
+
+```
+                            ┌────────────────────────┐
+                            │       contribute       │
+                            │ (Autonomous Pipeline)  │
+                            └───────────┬────────────┘
+                                        │
+     ┌──────────────────┬───────────────┼───────────────┬──────────────────┐
+     ▼                  ▼               ▼               ▼                  ▼
+┌──────────────┐ ┌──────────────┐ ┌───────────┐ ┌──────────────┐ ┌────────────────────┐
+│ /ego-browser │ │ multi-agents │ │code-review│ │documentation │ │project-architecture│
+│(Issue & PR UI│ │(Root-Cause & │ │(Maintainer│ │(Changelog &  │ │(Module Boundary   │
+│ Inspection)  │ │ Research)    │ │ Diff Pass)│ │ API Docs)    │ │ Design)            │
+└──────────────┘ └──────────────┘ └───────────┘ └──────────────┘ └────────────────────┘
+```
+
+- **[`contribute`](skills/contribute/SKILL.md)** delegates deep root-cause reproduction and codebase research to **[`multi-agents`](skills/multi-agents/SKILL.md)** in Step 7.
+- It leverages browser tools (`/ego-browser`) in Steps 3–4 to inspect rendered GitHub/GitLab issue sidebars, linked PRs, and maintainer feedback.
+- It uses the multi-point checklist from **[`code-review`](skills/code-review/SKILL.md)** for Senior Maintainer diff reviews in Step 10 before opening the PR.
+- For doc-heavy changes, it pairs with **[`documentation`](skills/documentation/SKILL.md)**; for large architectural refactors, it pairs with **[`project-architecture`](skills/project-architecture/SKILL.md)**.
+- If you are contributing specifically to this skills collection itself, use **[`contribution`](skills/contribution/SKILL.md)**.
+
+---
 
 ## Installation
 
@@ -80,7 +109,7 @@ cp -r agents-skills/skills/<skill-name> ./your-project/.skills/
 
 Skills are loaded automatically by compatible agents when the task matches the skill's `description` in the frontmatter. You can also invoke them explicitly:
 
-**OpenCode / Claude Code examples:**
+**OpenCode / Claude Code / Agent examples:**
 
 ```
 > Use the project-architecture skill to design the architecture for a real-time chat app with WebSockets.
@@ -156,12 +185,22 @@ description: Clear trigger description for the agent
 ├── LICENSE
 ├── .gitignore
 ├── skills/
-│   ├── project-architecture/SKILL.md
-│   ├── code-review/SKILL.md
-│   ├── documentation/SKILL.md
-│   ├── contribution/SKILL.md
-│   ├── contribute/SKILL.md
-│   └── multi-agents/SKILL.md
+│   ├── project-architecture/
+│   │   └── SKILL.md
+│   ├── code-review/
+│   │   └── SKILL.md
+│   ├── documentation/
+│   │   └── SKILL.md
+│   ├── contribution/
+│   │   └── SKILL.md
+│   ├── contribute/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── ecosystem-detection.md
+│   │       ├── multi-agent-brief.md
+│   │       └── pr-template.md
+│   └── multi-agents/
+│       └── SKILL.md
 └── docs/
     └── architecture.md
 ```

@@ -37,13 +37,18 @@ git fetch upstream
 │   ├── code-review/SKILL.md
 │   ├── documentation/SKILL.md
 │   ├── contribution/SKILL.md
-│   ├── contribute/SKILL.md
+│   ├── contribute/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── ecosystem-detection.md
+│   │       ├── multi-agent-brief.md
+│   │       └── pr-template.md
 │   └── multi-agents/SKILL.md
 └── docs/
     └── architecture.md
 ```
 
-Each skill is **self-contained** in `skills/<skill-name>/SKILL.md`.
+Each skill is **self-contained** in `skills/<skill-name>/SKILL.md` (with optional `references/` for extended templates).
 
 ### 3. Install / Use the skills locally
 

@@ -154,4 +154,4 @@ ACCEPTANCE CRITERIA: <how to know it's done>
 ## References
 
 - This skill is designed to be portable across agent platforms — adapt the `Task` tool envelope to your runtime
-- Pairs with `contribute` (contribute workflow delegates to this skill in steps 6 and 9) and `code-review` (reviewer role can use that checklist)
+- Pairs with `contribute` (contribute workflow delegates to this skill in steps 7 and 10) and `code-review` (reviewer role can use that checklist)
