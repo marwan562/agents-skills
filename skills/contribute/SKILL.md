@@ -11,6 +11,18 @@ Delegates browsing to `/ego-browser` and deep analysis/review to `/multi-agents`
 here is tied to one project, one host, or one language - the pipeline shape is fixed,
 everything else is detected fresh each run.
 
+## Act with full ownership
+
+A trusted human contributor doesn't pitch a plan and wait for a nod before opening their
+editor - they read the issue, understand the codebase, and get to work, looping in a
+maintainer only when something is genuinely ambiguous or high-stakes. Once steps 1-5 have
+given you that same footing, hold yourself to the same standard. The checkpoints later in
+this skill are the *complete* list of moments worth a pause - a call a competent
+contributor would just make on their own (which existing test file to extend, whether a
+helper deserves its own file, how a commit body should read) is yours to make too, not a
+question to surface. Put the reasoning in the commit and PR description, where it's
+actually useful to a reviewer, rather than in a question that just delays step 8.
+
 ## What "done" looks like from the user's side
 
 Just this:
@@ -40,6 +52,8 @@ and opens the PR itself. It only interrupts you at the handful of checkpoints li
 
 ## External skills this depends on
 
+**Required - the pipeline leans on these directly:**
+
 - **`/ego-browser`** (steps 3-4) - opens the actual rendered issue/PR page: the "linked
   pull requests" sidebar, reactions/priority signals, comment threads, and lets you follow
   a cross-reference into a sibling repo (e.g. a `sveltejs/svelte` issue that a
@@ -49,13 +63,31 @@ and opens the PR itself. It only interrupts you at the handful of checkpoints li
   (`--json closedByPullRequestsReferences` where supported) plus a plain `web_fetch` of the
   URL, and tell the user you're in reduced-fidelity mode - the linked-PR sidebar and
   reactions won't come through as cleanly.
-- **`/multi-agents`** (step 7) - runs the three-role analysis/review brief. See
-  `references/multi-agent-brief.md` for the exact shape to hand it.
+- **`/multi-agents`** (steps 7 and 10) - runs the three-role analysis/review brief. See
+  `references/multi-agent-brief.md` for the exact shape to hand it. If it isn't installed,
+  or there's no subagent-spawning tool at all in this environment, don't let the pipeline
+  stall waiting for it - read the brief yourself and work through the three roles in order
+  (Root-Cause Analyst, then Codebase & Convention Researcher, then - held back until step
+  10 - Senior Maintainer Reviewer) inside your own reasoning instead. You lose the
+  independence of a separate pass doing it this way, so be honest in the reviewer role
+  rather than rubber-stamping your own work - reread that role's "OUTPUT EXPECTED" in the
+  brief and hold your diff to it as if someone else had written it.
 
 If the call shape either skill actually expects (flags, JSON, a fixed slot count) differs
-from what's described below, adapt the *format* to match its real interface but keep the
+from what's described here, adapt the *format* to match its real interface but keep the
 content and roles intact. If you're ever unsure how one wants to be invoked, ask the user
 to paste its SKILL.md once rather than guessing.
+
+**Optional companions - reach for these when the situation calls for it, not as a checklist
+to run through every time:**
+
+- **`code-review`** - lends its correctness/security/maintainability/performance/testing
+  checklist to the Senior Maintainer Reviewer role in step 10, so the review has real
+  structure behind it instead of a vague "looks fine."
+- **`documentation`** - for a change that touches public APIs, config, or commands, keeps
+  README/CHANGELOG/API docs in sync with the diff instead of leaving them stale.
+- **`project-architecture`** - for a cross-cutting or large-feature issue, works out module
+  boundaries before step 8 instead of improvising structure mid-implementation.
 
 ## Workflow
 
@@ -68,6 +100,12 @@ here - don't hardcode to whichever project you saw last.
 - `git remote -v` to see the actual remote setup (a fork workflow usually has `origin` =
   the user's fork, `upstream` = the real project). Add `upstream` from the parsed
   owner/repo if the fix needs to sync against it and it's missing.
+- If `origin` isn't something you'll actually be able to push to later - it points at the
+  upstream project itself rather than a fork, and you don't have write access - don't wait
+  until step 11 to find that out. Fork it now (`gh repo fork` / `glab repo fork`, run with
+  no arguments from inside the clone): both rename the existing `origin` to `upstream` and
+  add the new fork as `origin` automatically, so there's somewhere to push when the time
+  comes.
 - Detect the real default branch (`main`, `master`, `develop`, ...) - don't assume `main`.
   `git fetch` the right remote, check out the default branch, pull.
 - If there are uncommitted local changes, **stop and ask** rather than stashing - that
@@ -122,9 +160,11 @@ freshly-synced default branch from step 2, never off a stale local branch.
 
 ### 7. Delegate deep analysis to /multi-agents
 Once steps 3-5 give real context (not before - a vague brief produces vague agent output),
-run `/multi-agents` with a three-role brief. Read `references/multi-agent-brief.md` before
-your first call - it has the full template, including where the step 4 findings go, and a
-worked example so the roles come out sharp instead of generic. In short, the default roles:
+run `/multi-agents` with a three-role brief (or work the same brief solo, wearing each hat
+in turn - see "External skills this depends on" above - if it isn't available). Read
+`references/multi-agent-brief.md` before your first call - it has the full template,
+including where the step 4 findings go, and a worked example so the roles come out sharp
+instead of generic. In short, the default roles:
 
 1. **Root-Cause Analyst** - reproduces the bug (or nails the exact functional gap for a
    feature ask) and traces it to the actual responsible lines. Diagnoses; doesn't fix yet.
@@ -132,8 +172,10 @@ worked example so the roles come out sharp instead of generic. In short, the def
    will touch, prior art (similar past PRs/commits), the conventions gathered in step 5,
    and which existing tests already cover this area.
 3. **Senior Maintainer Reviewer** - held back until step 10; reviews a real diff, not the
-   issue. Simulates a maintainer of *this specific project*, using its actual stated
-   standards from step 5 rather than generic best practice.
+   issue. Simulates a maintainer of *this specific project*, applying the same
+   correctness/security/maintainability/performance/testing lens as the `code-review`
+   skill (use it directly if it's available) against the actual stated standards from
+   step 5, rather than generic best practice.
 
 Hand each agent the issue/PR content from step 3, the related-work findings from step 4
 (especially any rejected prior approach to avoid repeating), and the conventions from
@@ -161,16 +203,29 @@ and bring the disagreement to the user instead of pushing something unresolved.
 ### 11. Commit, push, and open the PR - automatically
 - Commit message per the project's own convention (Conventional Commits - `fix: ...` /
   `feat: ...` - by default, unless step 5 turned up something else).
-- Once step 10 passes, push to the user's fork and open the PR without waiting for a
-  go-ahead - that's what end-to-end automation means here. Draft the PR description from
-  `references/pr-template.md`, filled in with what actually changed, how it was tested,
-  `Closes #<issue-number>` (or whatever phrasing this project's own template used in
-  step 5), and a mention of any stale/rejected prior attempt from step 4 if one existed.
+- Once step 10 passes, push to the user's fork (the one confirmed or created back in
+  step 2) and open the PR without waiting for a go-ahead - that's what end-to-end
+  automation means here. Draft the PR description from `references/pr-template.md`, filled
+  in with what actually changed, how it was tested, `Closes #<issue-number>` (or whatever
+  phrasing this project's own template used in step 5), and a mention of any stale/rejected
+  prior attempt from step 4 if one existed.
+- If `gh`/`glab` isn't authenticated, or the push fails for any other reason, say so
+  plainly and tell the user what to run (`gh auth login`, etc.) - never report a PR as
+  opened when it wasn't. This is the one place a fabricated link would actually mislead
+  someone, so treat it as a hard rule rather than a judgment call.
 - The two exceptions that still stop and ask instead of proceeding: step 4 found an
   existing PR that already resolves this (see step 4's branches), or step 10 never
   converged after three rounds.
 
 ### 12. Hand off
+Give CI a few minutes and check it once (`gh pr checks --watch` or the platform
+equivalent) before calling this done - not to babysit it through days of human review, but
+because a red build from something the local run in step 9 couldn't catch (a CI-only lint
+rule, an OS or version you don't have locally) is worth one honest look, and one follow-up
+commit if the fix is quick, rather than leaving the user to discover it later. If it's
+still red after that look, or just slow to start, don't loop on it - note the status in
+the summary and move on.
+
 One short summary: what the issue was, what changed, what was tested, and the branch/PR
 link. Don't re-paste the whole diff - the user just watched it happen.
 
@@ -191,8 +246,9 @@ The three-role default fits most single-issue contributions. Adjust only when th
 genuinely calls for it:
 - **Trivial fix** (typo, one-line logic bug, clear repro) - merge Analyst and Researcher
   into one role; go straight to a light review.
-- **Cross-cutting or multi-file feature** - add a fourth **Docs/Changelog Agent** so
-  README/CHANGELOG/API-doc updates aren't an afterthought.
+- **Cross-cutting or multi-file feature** - add a fourth **Docs/Changelog Agent** (or hand
+  this to the `documentation` skill directly) so README/CHANGELOG/API-doc updates aren't
+  an afterthought.
 - **Continuing someone else's PR** (not a fresh issue) - swap Root-Cause Analyst for a
   **PR State Analyst**: what's already done, what review feedback is still unresolved.
 - **A stale/rejected prior attempt turned up in step 4** - give the Root-Cause Analyst that
@@ -206,6 +262,56 @@ step 5 detects the project's conventions, and `references/ecosystem-detection.md
 the toolchain. Step 4's sibling-repo awareness means it also isn't limited to looking in
 just the one repo the issue happened to be filed in. The pipeline shape is the only fixed
 part; everything else is discovered fresh on every run.
+
+## Examples
+
+### Example 1 - Straightforward fix, no checkpoints hit
+> "Here's the next one: `https://github.com/expressjs/express/issues/1234`. Repo's in
+> contributions/."
+
+1. Parses the URL; finds `~/contributions/express` already cloned with `origin` = fork,
+   `upstream` = expressjs/express; syncs `main`.
+2. Reads the issue via `/ego-browser` - a maintainer already commented that it's a null
+   check in `lib/router/route.js`; no linked PR, no prior attempts.
+3. Checks `CONTRIBUTING.md` and the lint config, branches `fix/1234-route-null-check`.
+4. Runs the three-role brief: Root-Cause Analyst lands on `route.js:38`, Researcher points
+   at the existing test pattern in `test/Route.js`.
+5. Implements the guard, adds a test, runs the suite and linter, sends the diff through the
+   Reviewer role - approved on the first pass.
+6. Commits, pushes to the fork, opens the PR from the template, watches CI turn green, and
+   hands off with a three-line summary and the PR link.
+
+Every decision here, from branch name to commit message, was already answered by the
+brief and the project's own conventions - nothing needed a check-in.
+
+### Example 2 - Duplicate work found, checkpoint hit
+> "Pick up `https://gitlab.com/some-org/some-app/-/issues/88`."
+
+1. Locates and syncs the clone, opens the issue.
+2. Step 4 turns up an open, approved MR (`!142`) that already closes it, just awaiting
+   merge.
+3. Stops: "Issue #88 already has an approved, unmerged MR (!142) that closes it - want me
+   to review/improve that one instead, or move to a different issue?"
+
+Opening a second PR here would hand the maintainer two competing fixes to reconcile - this
+is exactly what the checkpoint exists for, not a failure of nerve elsewhere in the pipeline.
+
+### Example 3 - Thin issue, /multi-agents unavailable, agent adapts
+> "start this issue: `https://github.com/foo/cli-tool/issues/9` - contributions/"
+
+1. The issue is one line - "crashes on --verbose" - no repro, no comments.
+2. `/multi-agents` isn't installed here. Rather than stalling, works the brief solo:
+   reproduces the crash first (Analyst hat), traces it to an unguarded `.split()` on
+   undefined output, then switches to the Researcher hat to find the existing
+   flag-parsing tests.
+3. Implements the fix and a regression test, runs the suite.
+4. Reviews its own diff wearing the Reviewer hat as if it were someone else's PR, catches
+   that `--verbose --json` together still crashes, and fixes that too before moving on.
+5. Opens the PR, noting that the original issue was thin and the repro was reconstructed
+   from the stack trace, so a maintainer can sanity-check the interpretation.
+
+Adapting to what's actually available beats stalling to ask the user to install something
+they may not know they're missing.
 
 ## Reference files
 - `references/multi-agent-brief.md` - exact brief template + worked example for step 7,
