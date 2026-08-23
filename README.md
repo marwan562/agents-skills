@@ -16,6 +16,7 @@ Goals:
 
 | Skill | Directory | Scope & Purpose |
 |---|---|---|
+| [**competitive-programming-coach**](skills/competitive-programming-coach/SKILL.md) | [`skills/competitive-programming-coach/`](skills/competitive-programming-coach/) | Socratic coaching & expert solving for LeetCode, Codeforces, AtCoder, and contest algorithms |
 | [**project-architecture**](skills/project-architecture/SKILL.md) | [`skills/project-architecture/`](skills/project-architecture/) | Design clean, scalable project architectures and module boundaries from requirements |
 | [**code-review**](skills/code-review/SKILL.md) | [`skills/code-review/`](skills/code-review/) | Systematic code review for correctness, security, performance, and maintainability |
 | [**documentation**](skills/documentation/SKILL.md) | [`skills/documentation/`](skills/documentation/) | Create and maintain accurate project documentation, changelogs, and API references |
@@ -69,6 +70,7 @@ npx skills add marwan562/agents-skills
 Install a single skill:
 
 ```bash
+npx skills add marwan562/agents-skills --skill competitive-programming-coach
 npx skills add marwan562/agents-skills --skill project-architecture
 npx skills add marwan562/agents-skills --skill code-review
 npx skills add marwan562/agents-skills --skill documentation
@@ -112,6 +114,8 @@ Skills are loaded automatically by compatible agents when the task matches the s
 **OpenCode / Claude Code / Agent examples:**
 
 ```
+> Help me solve this Codeforces problem using competitive-programming-coach: https://codeforces.com/problemset/problem/1234/D
+
 > Use the project-architecture skill to design the architecture for a real-time chat app with WebSockets.
 
 > Run code-review on the recent changes in src/auth/
@@ -185,6 +189,8 @@ description: Clear trigger description for the agent
 ├── LICENSE
 ├── .gitignore
 ├── skills/
+│   ├── competitive-programming-coach/
+│   │   └── SKILL.md
 │   ├── project-architecture/
 │   │   └── SKILL.md
 │   ├── code-review/

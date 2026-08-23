@@ -33,6 +33,7 @@ git fetch upstream
 ├── LICENSE
 ├── .gitignore
 ├── skills/
+│   ├── competitive-programming-coach/SKILL.md
 │   ├── project-architecture/SKILL.md
 │   ├── code-review/SKILL.md
 │   ├── documentation/SKILL.md
