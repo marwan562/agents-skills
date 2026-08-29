@@ -27,3 +27,14 @@ This template is used in **Step 11** of the `contribute` pipeline to automatical
 <!-- Mention any related issues, sibling PRs, or rejected prior attempts if found in Step 4 -->
 - Closes #<issue-number>
 ```
+
+## Reference files
+
+- `references/multi-agent-brief.md` - exact brief template + worked example for step 7,
+  including where step 4's related-work findings go.
+- `references/ecosystem-detection.md` - language/build-tool detection and command lookup
+  for steps 5 and 9.
+- `references/pr-template.md` - PR description template for step 11.
+- `references/human-voice.md` - word/structure blocklist and calibration technique for
+  writing PR titles, descriptions, and comments that read like the person who did the
+  work, not generated boilerplate. Read this before drafting any of that in step 11.
