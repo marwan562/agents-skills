@@ -19,8 +19,6 @@ This document explains the architecture of the **agents-skills** repository, why
 ├── LICENSE                      # MIT
 ├── .gitignore                   # Standard OS/editor/build ignores
 ├── skills/                      # One directory per skill
-│   ├── competitive-programming-coach/
-│   │   └── SKILL.md
 │   ├── project-architecture/
 │   │   └── SKILL.md
 │   ├── code-review/
