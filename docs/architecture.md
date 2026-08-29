@@ -31,6 +31,7 @@ This document explains the architecture of the **agents-skills** repository, why
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── ecosystem-detection.md
+│   │       ├── human-voice.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
 │   └── multi-agents/
@@ -45,7 +46,7 @@ This document explains the architecture of the **agents-skills** repository, why
 |---|---|
 | **One directory per skill** | Enables independent versioning, per-skill `skills add --skill <name>` installs, and isolated PRs (one skill per PR). Avoids merge conflicts in a monolithic file. |
 | **Single `SKILL.md` per skill** | Required by the Agent Skills spec. Registry crawlers look for `skills/<name>/SKILL.md` exactly. Additional files would be ignored or create ambiguity. |
-| **Modular `references/` subdirectories** | For complex skills like `contribute`, reference templates (briefs, ecosystem matrix, PR templates) live alongside `SKILL.md` in `references/`, keeping the main instruction file clear and maintainable. |
+| **Modular `references/` subdirectories** | For complex skills like `contribute`, reference templates (briefs, ecosystem matrix, PR templates, human voice guidelines) live alongside `SKILL.md` in `references/`, keeping the main instruction file clear and maintainable. |
 | **Top-level `skills/` directory** | Convention adopted by `skills.sh` and OpenCode. Keep the name `skills` — do not rename to `skill` or `agent-skills`. |
 | **No code artifacts** | Skills are instructions for LLMs, not executable programs. Adding code would couple the repo to a language/toolchain and violate the "simple and clean" goal. |
 | **`docs/` for meta-documentation** | Separates contributor-oriented docs (`CONTRIBUTING.md` at root for GitHub discovery, `architecture.md` under `docs/` for deep dives) from the skill catalog itself. |
@@ -114,7 +115,7 @@ The updated `contribute` skill implements an **autonomous 12-step contribution p
 8. **Implement**: Applies the minimal surgical diff.
 9. **Verify Locally**: Executes actual project test, lint, and build suites.
 10. **Maintainer-Style Review**: Loops diff through Senior Maintainer Reviewer (up to 3 iterations).
-11. **Commit, Push, and Open PR**: Formats commit message, pushes to fork, and creates PR using [`pr-template.md`](../skills/contribute/references/pr-template.md).
+11. **Commit, Push, and Open PR**: Formats commit message, pushes to fork, drafts maintainer-friendly PR description using [`pr-template.md`](../skills/contribute/references/pr-template.md), and applies tone and authenticity calibration from [`human-voice.md`](../skills/contribute/references/human-voice.md) to avoid generic AI-sounding boilerplate.
 12. **Handoff**: Summarizes the contribution and returns the PR link.
 
 ### The 4 Stopping Checkpoints
@@ -123,6 +124,17 @@ The skill only stops and asks the user in 4 specific situations:
 2. No local clone found on disk (confirms cloning location).
 3. Step 4 finds an existing merged or high-quality open PR already resolving the issue.
 4. Step 10 review loop does not converge after three rounds of changes.
+
+### Reference Resources for `contribute`
+
+The `contribute` skill delegates detailed templates, toolchain matrices, and tone guidelines to modular files in `skills/contribute/references/`:
+
+| Reference Document | Purpose | Used In |
+|---|---|---|
+| [`ecosystem-detection.md`](../skills/contribute/references/ecosystem-detection.md) | Language-to-toolchain mapping for builds, tests, and linters | Steps 5 & 9 |
+| [`multi-agent-brief.md`](../skills/contribute/references/multi-agent-brief.md) | Prompts and roles (Analyst, Researcher, Reviewer) for sub-agent delegation | Steps 7 & 10 |
+| [`pr-template.md`](../skills/contribute/references/pr-template.md) | Structured template for pull request descriptions | Step 11 |
+| [`human-voice.md`](../skills/contribute/references/human-voice.md) | Anti-AI boilerplate blocklist, project tone matching, and authentic phrasing guide | Step 11 & Public Comments |
 
 ---
 

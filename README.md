@@ -51,6 +51,7 @@ While every skill functions standalone, higher-level workflow skills coordinate 
 - **[`contribute`](skills/contribute/SKILL.md)** delegates deep root-cause reproduction and codebase research to **[`multi-agents`](skills/multi-agents/SKILL.md)** in Step 7.
 - It leverages browser tools (`/ego-browser`) in Steps 3–4 to inspect rendered GitHub/GitLab issue sidebars, linked PRs, and maintainer feedback.
 - It uses the multi-point checklist from **[`code-review`](skills/code-review/SKILL.md)** for Senior Maintainer diff reviews in Step 10 before opening the PR.
+- It applies human voice calibration ([`skills/contribute/references/human-voice.md`](skills/contribute/references/human-voice.md)) and structured PR templates ([`skills/contribute/references/pr-template.md`](skills/contribute/references/pr-template.md)) in Step 11 when drafting commit messages, issue comments, and PR descriptions.
 - For doc-heavy changes, it pairs with **[`documentation`](skills/documentation/SKILL.md)**; for large architectural refactors, it pairs with **[`project-architecture`](skills/project-architecture/SKILL.md)**.
 - If you are contributing specifically to this skills collection itself, use **[`contribution`](skills/contribution/SKILL.md)**.
 
@@ -197,6 +198,7 @@ description: Clear trigger description for the agent
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── ecosystem-detection.md
+│   │       ├── human-voice.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
 │   └── multi-agents/

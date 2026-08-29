@@ -41,6 +41,7 @@ git fetch upstream
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── ecosystem-detection.md
+│   │       ├── human-voice.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
 │   └── multi-agents/SKILL.md
