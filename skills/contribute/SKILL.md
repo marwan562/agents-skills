@@ -1,15 +1,24 @@
 ---
 name: contribute
-description: Use this skill whenever the user wants to contribute to an open-source project - fixing a bug, implementing a feature, or picking up a GitHub/GitLab/Gitea issue or pull request. Trigger on any issue or PR link paired with intent to work on it ("start this issue", "let's fix", "pick up this ticket", "here's the next one"), on mentions of a local "contributions" directory, or on requests to open a PR against an external repo. This skill runs the full contribution pipeline for ANY repo and ANY language - locate and sync the local clone, read the issue/PR using /ego-browser for the full rendered page and any linked or sibling-repo PRs, check whether someone already solved it, delegate deep investigation and review to /multi-agents with a Root-Cause Analyst, a Codebase and Convention Researcher, and a Senior Maintainer Reviewer, implement the change, verify it, then push and open the PR automatically end-to-end. Always consult this skill instead of improvising an ad hoc contribution workflow.
+description: Use this skill whenever the user wants to contribute to an open-source project - fixing a bug, implementing a feature, or picking up a GitHub/GitLab/Gitea issue or pull request. Trigger on any issue or PR link paired with intent to work on it ("start this issue", "let's fix", "pick up this ticket", "here's the next one"), on mentions of a local "contributions" directory, or on requests to open a PR against an external repo. This skill runs the full contribution pipeline for ANY repo and ANY language - locate and sync the local clone, MUST invoke the ego-browser skill for full rendered intake of the issue/PR page (full thread, screenshots/images, linked PR sidebar, external repro URLs) before any code work, check whether someone already solved it, delegate deep investigation and review to /multi-agents with a Root-Cause Analyst, a Codebase and Convention Researcher, and a Senior Maintainer Reviewer, implement the change, verify it, then push and open the PR automatically end-to-end. gh/glab is a structured-data complement, never a replacement for the rendered read. Always consult this skill instead of improvising an ad hoc contribution workflow.
 ---
 
 # Contribute
 
 Orchestrates an end-to-end open-source contribution: from a bare issue/PR link all the
 way to an opened PR, with no manual gate in between once the work itself checks out.
-Delegates browsing to `/ego-browser` and deep analysis/review to `/multi-agents`. Nothing
-here is tied to one project, one host, or one language - the pipeline shape is fixed,
-everything else is detected fresh each run.
+Delegates rendered issue/PR intake to `/ego-browser` (blocking-required, steps 3-4)
+and deep analysis/review to `/multi-agents`. Nothing here is tied to one project,
+one host, or one language - the pipeline shape is fixed, everything else is detected
+fresh each run.
+
+> **Issue-intake gate (blocking):** steps 3-4 MUST run inside the `ego-browser`
+> skill against the live rendered page - never as a `gh issue view` / `web_fetch`
+> text dump alone. Screenshots, attached images/video, and external repro/documentation
+> URLs embedded in the body or comments MUST be opened and read, not skipped. No code
+> is touched, no branch is created, and no `/multi-agents` brief is sent until the
+> intake artifact in `references/issue-intake.md` exists. If `ego-browser` is missing
+> or fails, stop and resolve that first - do not proceed in reduced-fidelity mode.
 
 ## Act with full ownership
 
@@ -42,8 +51,11 @@ and opens the PR itself. It only interrupts you at the handful of checkpoints li
 ## Inputs
 
 - **Required:** one URL to an issue or PR. Parse it generically - host, owner/org, repo
-  name, number - rather than assuming GitHub. GitHub -> use `gh`. GitLab -> use `glab`.
-  Anything else -> fall back to `/ego-browser` or `web_fetch`/`web_search` against the web UI.
+  name, number - rather than assuming GitHub. GitHub -> use `gh` for structured
+  fields. GitLab -> use `glab` for structured fields. Anything else -> detect via
+  `/ego-browser` (preferred) or `web_fetch`/`web_search` against the web UI.
+  Host detection never changes the intake rule: the issue/PR CONTENT itself is always
+  read rendered inside `/ego-browser` per `references/issue-intake.md`, on every host.
 - **Inferred when not stated:**
   - *Local repo path* - check in this order: (a) a path the user just mentioned, (b)
     `~/contributions/<repo>`, (c) `~/code/contributions/<repo>`, (d) `./contributions/<repo>`
@@ -58,17 +70,35 @@ and opens the PR itself. It only interrupts you at the handful of checkpoints li
 
 ## External skills this depends on
 
-**Required - the pipeline leans on these directly:**
+**Blocking-required - the pipeline stops without this:**
 
-- **`/ego-browser`** (steps 3-4) - opens the actual rendered issue/PR page: the "linked
-  pull requests" sidebar, reactions/priority signals, comment threads, and lets you follow
-  a cross-reference into a sibling repo (e.g. a `sveltejs/svelte` issue that a
-  `sveltejs/kit` PR references). This is the tool for "has anyone already touched this,"
-  since that context often isn't clean structured data - it's rendered UI. If `/ego-browser`
-  isn't available in a given environment, fall back to `gh issue view`/`gh pr view`
-  (`--json closedByPullRequestsReferences` where supported) plus a plain `web_fetch` of the
-  URL, and tell the user you're in reduced-fidelity mode - the linked-PR sidebar and
-  reactions won't come through as cleanly.
+- **`/ego-browser`** (steps 3-4, blocking gate) - the ONLY accepted way to read the
+  issue/PR. Open the live rendered page as a maintainer would see it and capture:
+  (a) title, body, labels, assignees, state, reactions/priority signals;
+  (b) the FULL comment thread including collapsed/hidden comments, review threads,
+  and the "linked pull requests" sidebar;
+  (c) every visual asset - screenshots, attached images, video/GIF, pasted rich
+  media - viewed at full resolution, with what each one actually shows written down;
+  (d) every external URL in body/comments (repro repos, CodeSandbox/StackBlitz,
+  live demos, docs, videos, sibling-repo issues/PRs) - followed and summarized;
+  (e) cross-references into sibling repos in the same org.
+  Follow the exact protocol in `references/issue-intake.md` and produce its intake
+  artifact before touching code. `gh issue view` / `glab` / `web_fetch` supply
+  structured fields (state, timeline, assignees) as a complement - they NEVER replace
+  the rendered read, because linked-PR sidebars, reactions, images, and external
+  repro content do not come through cleanly as text.
+  - If `/ego-browser` is not installed, cannot launch, or the page fails to load:
+    STOP. Do not fall back to a CLI-only read and keep going. Tell the user plainly
+    what failed and what resolves it (e.g. install/enable the skill, log in for a
+    private repo, paste the exact error), and wait. A `gh`-only read is not an
+    acceptable substitute for this gate.
+  - Opencode / generic agents: invoke it the way this environment loads skills
+    (slash-command, Skill tool, or `ego-browser nodejs` heredoc per its SKILL.md).
+    Adapt only the invocation format, never the content bar: full thread + visuals
+    + external links, every run.
+
+**Required with graceful solo fallback:**
+
 - **`/multi-agents`** (steps 7 and 10) - runs the three-role analysis/review brief. See
   `references/multi-agent-brief.md` for the exact shape to hand it. If it isn't installed,
   or there's no subagent-spawning tool at all in this environment, don't let the pipeline
@@ -117,18 +147,39 @@ here - don't hardcode to whichever project you saw last.
 - If there are uncommitted local changes, **stop and ask** rather than stashing - that
   work may matter to the user.
 
-### 3. Read the issue or PR
-Open it with `/ego-browser` so you see the page as a maintainer would - the linked-PR
-sidebar, labels, reactions, and full comment thread - not just a flat text dump. Pull out
-the actual problem statement, repro steps, acceptance criteria, labels (bug/feature/
-good-first-issue changes how wide the fix should be), and anything a maintainer already
-said in the comments - a maintainer's clarifying comment outranks the original issue body.
-Also use `gh`/`glab` for the structured fields (state, assignees, timeline) that are
-awkward to parse out of rendered HTML. If the issue is thin, say so; Agent A in step 7 will
-need to reproduce it rather than take the description at face value.
+### 3. Read the issue or PR (BLOCKING - ego-browser only)
+Run this inside `/ego-browser` per `references/issue-intake.md`. Do not start it via
+`gh issue view` alone, and do not treat the first screen as the whole read.
 
-### 4. Check for related work and duplicates
-Before writing anything, find out if this ground has already been covered:
+1. Open the exact URL the user shared in a dedicated `ego-browser` task space
+   (e.g. `contribute-issue-<number>`). Wait for load, capture `snapshotText()`,
+   and scroll/expand until the full thread is visible - including collapsed,
+   "show more", "load more", and resolved review threads.
+2. Capture structured state as a complement (`gh`/`glab`: state, labels,
+   assignees, timeline), but the rendered read is the record of truth. A
+   maintainer's clarifying comment outranks the original issue body.
+3. Inventory and OPEN every visual asset: screenshots, drag-dropped images,
+   attachments, GIF/video. View each at full resolution (follow its link or
+   screenshot it), and write down what it proves - error text, broken UI state,
+   expected vs. actual - not just "has screenshot". An unread image is an
+   incomplete read.
+4. Inventory and FOLLOW every external URL in the body and comments - repro repo,
+   branch, commit, CodeSandbox/StackBlitz/CodePen, live demo, docs page, video,
+   log paste, sibling issue/PR. Open each in the same task space, note what it
+   contains and whether it still loads. Mark dead links as dead; never silently
+   ignore them.
+5. Pull out the problem statement, repro steps, acceptance criteria, and how
+   labels change scope (bug vs. feature vs. good-first-issue). Quote maintainer
+   direction verbatim for the step 7 brief.
+6. Write the intake artifact (title, thread summary, visual inventory, external-link
+   inventory, related-work leads) exactly as `references/issue-intake.md` defines.
+   Steps 4, 6, and 7 MUST NOT start until it exists. If the issue body is thin
+   after all of this, say so explicitly - Agent A in step 7 reproduces from the
+   visuals/repro link rather than the text.
+
+### 4. Check for related work and duplicates (still inside ego-browser)
+Before writing anything, find out if this ground has already been covered, using
+the rendered context from step 3 - not title search alone:
 - Look at the "linked pull requests" sidebar from step 3 for anything already tied to this
   issue.
 - Search the issue/PR body and comments for references to other issues or PRs - including
@@ -136,7 +187,9 @@ Before writing anything, find out if this ground has already been covered:
   `sveltejs/svelte` + `sveltejs/kit` cross-references constantly; don't assume the fix
   lives only in the repo the issue was filed against).
 - Use `/ego-browser` to open any candidate PR(s) you find and read their actual status and
-  review history, not just their title.
+  review history, not just their title. Follow cross-repo references in the browser
+  too - a fix that started in a sibling repo reads differently in rendered review
+  comments than in a timeline API dump.
 - Branch on what you find:
   - **Already merged and it closes this issue** - stop, tell the user it looks resolved
     already (with the link), and check whether the original issue should have been closed
@@ -167,7 +220,10 @@ freshly-synced default branch from step 2, never off a stale local branch.
 ### 7. Delegate deep analysis to /multi-agents
 Once steps 3-5 give real context (not before - a vague brief produces vague agent output),
 run `/multi-agents` with a three-role brief (or work the same brief solo, wearing each hat
-in turn - see "External skills this depends on" above - if it isn't available). Read
+in turn - see "External skills this depends on" above - if it isn't available). The brief's
+Shared Context Block MUST include the step 3 intake artifact verbatim - thread quotes,
+visual-asset findings, and external-link findings - plus step 4 and step 5 context, so
+subagents never re-derive or silently drop what the browser already proved. Read
 `references/multi-agent-brief.md` before your first call - it has the full template,
 including where the step 4 findings go, and a worked example so the roles come out sharp
 instead of generic. In short, the default roles:
@@ -280,6 +336,9 @@ One short summary: what the issue was, what changed, what was tested, and the br
 link. Don't re-paste the whole diff - the user just watched it happen.
 
 ## Checkpoints (the only points that stop and ask)
+- ego-browser gate fails (missing skill, launch/auth failure, page won't render,
+  visuals or external repro link unreadable) -> stop and resolve before any code work.
+  Never downgrade to a gh-only read to stay moving.
 - Uncommitted local changes found in step 2 -> ask, don't stash.
 - No local clone found -> ask before cloning, and confirm the path.
 - Git identity in 11.4 isn't clearly the real submitter -> ask, don't guess.
@@ -290,10 +349,11 @@ link. Don't re-paste the whole diff - the user just watched it happen.
 - Voice Gate in 11.3 still fails after three rewrites -> stop and show the draft to the
   user instead of pushing it anyway.
 
-Everything else - reading files, browsing via `/ego-browser`, running `/multi-agents`,
+Everything else - reading files, running `/multi-agents`,
 running tests, iterating on the diff, committing, pushing, and opening the PR - proceeds
-straight through without asking, by design. The Voice Gate is part of "straight through":
-it runs every time, it just doesn't ask, it rewrites until it passes.
+straight through without asking, by design. The ego-browser intake gate and the Voice
+Gate are part of "straight through": they run every time, they just don't ask, they
+complete (intake artifact exists / voice self-check passes) before moving on.
 
 ## Scaling the agent brief
 The three-role default fits most single-issue contributions. Adjust only when the issue
@@ -325,8 +385,10 @@ part; everything else is discovered fresh on every run.
 
 1. Parses the URL; finds `~/contributions/express` already cloned with `origin` = fork,
    `upstream` = expressjs/express; syncs `main`.
-2. Reads the issue via `/ego-browser` - a maintainer already commented that it's a null
-   check in `lib/router/route.js`; no linked PR, no prior attempts.
+2. Runs the blocking intake in `/ego-browser` - full thread, linked-PR sidebar empty,
+   one attached screenshot opened at full size confirming the null-route stack, no
+   external repro link; writes the intake artifact. A maintainer comment points at
+   the null check in `lib/router/route.js`; no prior attempts.
 3. Checks `CONTRIBUTING.md` and the lint config, branches `fix/1234-route-null-check`.
 4. Runs the three-role brief: Root-Cause Analyst lands on `route.js:38`, Researcher points
    at the existing test pattern in `test/Route.js`.
@@ -353,7 +415,9 @@ is exactly what the checkpoint exists for, not a failure of nerve elsewhere in t
 ### Example 3 - Thin issue, /multi-agents unavailable, agent adapts
 > "start this issue: `https://github.com/foo/cli-tool/issues/9` - contributions/"
 
-1. The issue is one line - "crashes on --verbose" - no repro, no comments.
+1. The issue is one line - "crashes on --verbose" - no repro, no comments. The
+   blocking intake still runs in `/ego-browser`: full thread scrolled to footer,
+   visuals NONE, external links NONE - recorded in the intake artifact as gaps.
 2. `/multi-agents` isn't installed here. Rather than stalling, works the brief solo:
    reproduces the crash first (Analyst hat), traces it to an unguarded `.split()` on
    undefined output, then switches to the Researcher hat to find the existing
@@ -369,6 +433,10 @@ they may not know they're missing.
 
 ## Reference files
 
+- `references/issue-intake.md` - BLOCKING intake protocol for steps 3-4: how to drive
+  `/ego-browser` (task space, full-thread scroll, visual-asset handling, external-URL
+  handling), the intake artifact shape, and the stop-conditions. Read before opening
+  the issue URL. No intake artifact, no code.
 - `references/human-voice.md` - BLOCKING for *any* public-facing text (issue comment,
   PR description, merge request comment, review reply, status update). Read it before
   drafting, match this repo's own merged PRs, write in B2 casual English, and run its

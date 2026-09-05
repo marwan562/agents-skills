@@ -45,6 +45,11 @@ ISSUE TITLE: <Title>
 ISSUE DESCRIPTION & COMMENTS:
 <Verbatim description and key maintainer comment quotes>
 
+INTAKE - RENDERED EVIDENCE (From steps 3-4 via ego-browser, paste verbatim):
+<VISUALS inventory: each screenshot/image/video + what it proves, key text transcribed>
+<EXTERNAL LINKS inventory: each repro/demo/docs/video/sibling-ref URL + loads Y/N + one fact>
+<GAPS: what is unknown, what must be reproduced vs. taken at face value>
+
 RELATED WORK & PRIOR ART (From Step 4):
 <Candidate PRs, sibling repo issues, or rejected prior attempts with reasons>
 
