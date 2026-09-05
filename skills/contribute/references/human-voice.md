@@ -115,14 +115,16 @@ This is the fastest way PRs get flagged. Fix all of these:
 |---|---|---|
 | Tiny: typo, 1 to 5 lines | 1 to 2 sentences + `Closes #N` | No headers, no list, no checklist |
 | Small: one bug fix, one file or two | 3 to 6 sentences: what broke, what you changed, how you tested | No template headers unless the repo template forces them |
-| Medium: feature or multi-file fix | Short paragraphs, headers only if the repo's own
-`PULL_REQUEST_TEMPLATE.md` has them | Fill the repo's headers with plain sentences, not sub-bullets longer than the diff |
+| Medium: feature or multi-file fix | Short paragraphs. Use the repo's headers only when its `PULL_REQUEST_TEMPLATE.md` forces them. | Only if the repo template has them |
 
 Never write more bullet lines than the diff has changed lines. Never paste
 a full test log. One command plus its result is enough.
 
-What every body needs, in this order: why (the symptom or repro), what you
-picked (one decision, briefly), proof (test command + pass), issue link.
+What every PR description needs, in this order: why (the symptom or repro), what you
+picked (one decision, briefly), proof (test command + pass), issue link (`Closes #N`
+or whatever phrasing this repo uses, once). Review replies and issue comments need
+the same brevity but no `Closes #N` unless the message intentionally closes an issue.
+Never invent an issue number to satisfy the template.
 What it never needs: a tour of every file touched.
 
 ## Rule 5: act like a senior, not a beginner chasing credit
@@ -153,15 +155,18 @@ What it never needs: a tour of every file touched.
 Run these literally. All must pass:
 
 ```bash
-# 1. No em/en dashes or bare -- pauses outside code (backticked --flag is fine)
-git diff --cached | grep -nE '—|–' && echo "FAIL: em/en dash found"
+# 1. No em/en dashes in the draft itself (backticked --flag in code is fine)
+if printf '%s\n' "$PR_TITLE" "$PR_BODY" | grep -nE '—|–'; then
+  echo "FAIL: em/en dash found"
+  exit 1
+fi
 # then eyeball the PR body for a bare " -- " used as a pause and rewrite it
 
-# 2. No banned words (case-insensitive scan of your title + body draft)
-printf '%s\n' "$PR_TITLE" "$PR_BODY" | grep -inE 'delve|tapestry|vibrant|crucial|comprehensive|robust|seamless|groundbreaking|transformative|paramount|multifaceted|myriad|cornerstone|pivotal|intricate|meticulous|holistic|paradigm|synergy|catalyst|bolster|spearhead|reimagine|empower|unleash|revolutionize|elucidate|encompass|furthermore|moreover|additionally|leverag|utiliz|facilitat|showcas|foster|testament|realm|landscape|harness' && echo "FAIL: banned word found"
+# 2. No banned words (case-insensitive scan of your title + body draft, kept in sync with Rule 2)
+printf '%s\n' "$PR_TITLE" "$PR_BODY" | grep -inE 'delve|tapestry|vibrant|crucial|comprehensive|robust|seamless|groundbreaking|transformative|paramount|multifaceted|myriad|cornerstone|pivotal|intricate|meticulous|holistic|paradigm|synergy|catalyst|bolster|spearhead|reimagine|empower|unleash|revolutionize|elucidate|encompass|furthermore|moreover|additionally|leverag|utiliz|facilitat|showcas|foster|garner|underscore|testament|realm|landscape|journey|nuanced|harness|ensur|various' && echo "FAIL: banned word found"
 
-# 3. No chatbot closers or openers
-printf '%s\n' "$PR_BODY" | grep -inE "hope this helps|let me know if you have any|feel free to|great question|in order to|worth noting|following changes|this PR aims" && echo "FAIL: banned phrase found"
+# 3. No chatbot closers, openers, or filler phrases (kept in sync with Rule 2)
+printf '%s\n' "$PR_BODY" | grep -inE "hope this helps|let me know if you have any|feel free to|great question|in order to|due to the fact that|worth noting|note that|following changes|this PR aims|not only|serves as|in today|future looks bright|without further ado|embark" && echo "FAIL: banned phrase found"
 ```
 
 Then check by eye:
@@ -171,7 +176,7 @@ Then check by eye:
 - [ ] At least one contraction in anything over 2 sentences.
 - [ ] Zero em dashes, zero "--" pauses, zero triple-adjective stacks.
 - [ ] Proof line present: command + result, not "ran the full suite".
-- [ ] `Closes #N` (or whatever phrasing this repo uses) present once.
+- [ ] `Closes #N` present once for PR descriptions; skipped for replies and comments unless closing an issue.
 - [ ] No headers, checklists, or emoji unless the repo template demands them.
 
 If any box fails, rewrite. Do not push a failing draft and "fix it later".
@@ -187,7 +192,7 @@ If any box fails, rewrite. Do not push a failing draft and "fix it later".
 
 - Bad: 4 headers, 8 bullets, and "comprehensive fix ensuring robust handling" for a 2-line change.
 - Good:
-  ```
+  ```text
   `--config ''` slipped through because the parser only checked presence,
   not empty. It doesn't error, it just exits 0. Fixed with a check next
   to the existing ones.
@@ -198,7 +203,7 @@ If any box fails, rewrite. Do not push a failing draft and "fix it later".
 **Small fix body**
 
 - Bad:
-  ```
+  ```text
   ## Summary
   This PR implements a comprehensive fix for the CLI's flag validation logic...
   ## Changes
@@ -206,7 +211,7 @@ If any box fails, rewrite. Do not push a failing draft and "fix it later".
   - Enhanced error messaging...
   ```
 - Good:
-  ```
+  ```text
   Running without --config used to exit 0 with no output. Now it prints
   a usage error and returns 1, same as --help already says it should.
   Tested with `go test ./cmd/...`, all pass. I've added one table case in

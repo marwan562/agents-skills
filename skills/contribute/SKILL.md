@@ -233,7 +233,8 @@ Keep the subject to one thing, short, same casing as merged PRs.
 - **11.3 Run the Voice Gate self-check** from `references/human-voice.md` Rule 6
 literally (banned-word grep, banned-phrase grep, dash grep, plus the eye checklist:
 one-thing title, length matches diff, contraction present, proof line with real
-command and result, `Closes #N` once, no headers/checklists/emoji unless the repo
+command and result, `Closes #N` once for PR descriptions (skipped for replies and
+comments unless closing an issue), no headers/checklists/emoji unless the repo
 template demands them). Rewrite until every check passes. A failing draft does not
 get pushed "and fixed later".
 - **11.4 Confirm the git identity first.** Check `git config --get user.name` /
