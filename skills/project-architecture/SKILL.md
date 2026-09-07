@@ -1,6 +1,6 @@
 ---
 name: project-architecture
-description: Use this skill when designing a clean project architecture from requirements — analyzing needs, proposing folder/module structure, responsibilities, dependencies, and key architecture decisions. Triggers on requests to design, structure, scaffold, or evaluate architecture for a new or existing project.
+description: Use this skill when designing a clean project architecture from requirements — analyzing needs, proposing folder/module structure, responsibilities, dependencies, and key architecture decisions. Triggers on requests to design, structure, scaffold, or evaluate architecture for a project.
 ---
 
 # Project Architecture

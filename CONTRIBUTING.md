@@ -167,7 +167,17 @@ EOF
 
 Before opening a PR, **validate locally**:
 
-### 1. Structure check
+### 1. Automated validation suite (recommended)
+
+Run the repository validator to verify frontmatter format, character limits (20-300 chars), required sections, and internal relative links:
+
+```bash
+python3 scripts/validate-skills.py
+```
+
+All skills must pass with `0 error(s)`.
+
+### 2. Manual structure check
 
 ```bash
 # Verify each skill has SKILL.md
@@ -181,28 +191,6 @@ for f in skills/*/SKILL.md; do
     echo "MISMATCH: $f dir=$dir front=$front"
   fi
 done
-```
-
-### 2. Frontmatter validation
-
-- Ensure file starts with `---` on line 1
-- Ensure YAML parses (no tabs, correct indentation)
-- `name` and `description` present and correctly formatted
-
-You can use a quick Python check:
-
-```bash
-python3 -c "
-import re, pathlib, yaml
-for p in pathlib.Path('skills').glob('*/SKILL.md'):
-    text = p.read_text()
-    assert text.startswith('---'), f'{p} missing frontmatter'
-    parts = text.split('---')
-    assert len(parts) >= 3, f'{p} invalid frontmatter delimiters'
-    data = yaml.safe_load(parts[1])
-    assert 'name' in data and 'description' in data, f'{p} missing name/description'
-    print(f'✓ {p}: {data[\"name\"]}')
-"
 ```
 
 > If `pyyaml` is not installed: `pip install pyyaml`

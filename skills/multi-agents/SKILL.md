@@ -1,157 +1,183 @@
 ---
 name: multi-agents
-description: Use this skill when a task benefits from parallel sub-agent collaboration — research, implementation, and review decomposed into specialized roles. Triggers on complex tasks, large refactors, or whenever the user wants multi-agent orchestration, devil's-advocate review, or fast parallel exploration.
+description: Use this skill to orchestrate complex tasks through parallel sub-agent collaboration — delegating research, implementation, and devil's-advocate review to specialized roles. Triggers on multi-agent, orchestration, delegate, complex refactors, and high-risk changes.
 ---
 
 # Multi-Agents
+
+> Work like a staff team, not a single thread — parallel minds, adversarial review, one verified outcome.
 
 Orchestrates complex tasks through parallel sub-agent collaboration: analyze, spawn, review, and integrate.
 
 ## Purpose
 
-Decompose a task that is too large, risky, or high-stakes for a single pass into parallel, non-overlapping sub-agent roles. Each sub-agent works with a focused brief, then results are synthesized into one coherent output with explicit review before delivery.
+Decompose complex, high-risk, or multifaceted engineering tasks into focused, non-overlapping sub-agent roles. By executing research and analysis concurrently, enforcing independent adversarial review, and systematically reconciling findings, this skill eliminates blind spots, prevents regression loops, and delivers verified, maintainer-grade outcomes.
 
 ## When to Use
 
-- Task has multiple independent workstreams (research, implementation, testing, docs)
-- High-risk change where a second perspective catches flaws (security, architecture, data migration)
-- User explicitly requests `multi-agents`, `orchestrate`, `parallel agents`, or `research + implement + review`
-- Large refactor or cross-cutting feature where a single agent would miss conventions or prior art
-- Need to validate reasoning, challenge assumptions, or compare trade-offs before committing
-- Keywords: `multi-agent`, `orchestration`, `parallel`, `delegate`, `sub-agent`, `devil's advocate`
+- Task has multiple independent workstreams (e.g., simultaneous codebase research, bug reproduction, and prior art search)
+- High-risk or breaking changes where a second perspective catches subtle security, architecture, or edge-case flaws
+- User explicitly requests `multi-agents`, `orchestrate`, `parallel agents`, `sub-agents`, or `devil's advocate`
+- Large refactor or cross-cutting feature where a single agent pass risks missing repository conventions
+- Validating reasoning, comparing architectural trade-offs, or exploring alternatives before committing
+- When delegated to by `contribute` for root-cause research and diff review
+
+Keywords: `multi-agent`, `orchestration`, `parallel`, `delegate`, `sub-agent`, `devil's advocate`
 
 ## Workflow
 
-### 1. Task analysis
-
-- Parse the task into objectives, constraints, and acceptance criteria
-- Classify parts as **independent** (can run in parallel), **sequential** (depends on prior output), or **risky** (needs extra review)
-- Determine the minimal set of roles needed — default to three, expand only when justified
-
-### 2. Multi-agent orchestration (required)
-
-Spawn parallel sub-agents with **specific, non-overlapping roles**. Provide each with: goal, context, constraints, and expected output format. Run independent agents in parallel whenever possible.
-
-**Default three-role brief** (adapt to the task):
-
-| Role | Focus | Output |
-|---|---|---|
-| **Researcher / Root-Cause Analyst** | Reproduce or ground the problem; trace to responsible code/lines; surface prior art | Short root-cause writeup with file:line pointers |
-| **Implementer / Codebase Researcher** | Identify files to touch, existing tests/patterns, conventions that apply | List of relevant files/patterns/tests + hidden conventions |
-| **Critic / Maintainer Reviewer** | Validate against acceptance criteria and project conventions; devil's-advocate trade-offs | Approval or actionable change list phrased as review comments |
-
-**When to scale:**
-
-- **Trivial task** — collapse Researcher and Implementer into one; keep a light Critic pass
-- **Cross-cutting feature** — add **Docs/Changelog** agent
-- **Large refactor** — add **Risk/Edge-Case** agent focused on rollback, migration, and failure modes
-- **Continuing a PR** — swap Researcher for **PR State Analyst** (what's done, what review feedback remains)
-
-Three well-briefed agents beat five thin ones — only add roles the task actually needs.
-
-### 3. Collaboration and thinking
-
-- Do NOT work alone — use sub-agents to validate your reasoning and propose alternatives
-- When you hit a decision point, spawn a sub-agent to independently analyze options and compare trade-offs before you commit
-- Use one sub-agent explicitly as **devil's advocate** to review your plan for flaws, edge cases, and missed requirements
-
-### 4. Review and integration
-
-- Collect results from all sub-agents and synthesize into one coherent output
-- Resolve contradictions (e.g., Researcher says bug is in `auth.ts:42`, Implementer points at `auth.ts:55` — reconcile by re-reading code)
-- Run a final review pass (yourself or a dedicated reviewer sub-agent) against the original acceptance criteria before delivering
-- If agents disagree and you cannot reconcile in one synthesis pass, surface the disagreement to the user with options rather than silently picking
-
-### 5. Reporting
-
-When done, report:
-
-- **(a) What was accomplished** — summary of changes/decisions
-- **(b) Which sub-agents were used and what each produced** — one line per agent
-- **(c) Assumptions made** — what you inferred vs. what was explicit
-- **(d) Anything left unfinished and why** — deferred work, open questions, follow-ups
-
-## How to invoke sub-agents
-
-This skill assumes your environment exposes a `task` tool (or equivalent) to spawn sub-agents. Shape the call generically:
-
 ```
+[1. Task Decomposition] ──> [2. Parallel Dispatch] ──> [3. Adversarial Critique] ──> [4. Synthesis & Dispute] ──> [5. Verification & Report]
+```
+
+### 1. Task Analysis & Role Selection
+
+- Parse requirements, scope boundaries, and acceptance criteria.
+- Classify workstreams:
+  - **Independent**: Can execute concurrently in parallel (e.g., root cause investigation + codebase conventions search).
+  - **Sequential**: Depends on prior stage output (e.g., implementation depends on root-cause analysis).
+  - **Adversarial / High-Risk**: Demands an independent critique pass (e.g., security, edge cases, maintainer review).
+- Select the minimal set of roles needed from [`references/role-catalog.md`](references/role-catalog.md). Default to the **Three-Role Brief**:
+  1. **Root-Cause Analyst**: Isolates the bug mechanism and responsible code lines.
+  2. **Codebase & Convention Researcher**: Maps target files, idiomatic patterns, and existing tests.
+  3. **Devil's Advocate / Maintainer Critic**: Held back until diff/plan exists to conduct an adversarial review.
+
+  **When to scale:**
+  - **Trivial / single-file** — collapse Analyst + Researcher into one brief; keep a light Critic pass
+  - **Cross-cutting feature** — add **Documentation Scribe (#8)** + **QA Specialist (#7)**
+  - **Large refactor / migration** — add **Performance Analyst (#6)** + **Security Auditor (#5)**
+  - **Continuing a PR** — swap Analyst for **PR State Analyst**: what's done, what review feedback remains
+
+  > Three well-briefed agents beat five thin ones — only add roles the task actually needs.
+
+### 2. Parallel Orchestration & Dispatch
+
+- Formulate an immutable **Shared Context Block** per the canonical spec in [`references/orchestration-protocol.md#shared-context-block`](references/orchestration-protocol.md). Minimal fast-path shape:
+  ```text
+  TASK: <verbatim task requirements>
+  SCOPE: <target directories or files>
+  CONSTRAINTS: <language, conventions, performance criteria>
+  ACCEPTANCE CRITERIA: <definition of done>
+  ```
+  Do not redefine fields here; that spec is canonical.
+- Dispatch independent sub-agents concurrently in a **single turn** using your environment's sub-agent tool (`Task`, `browser_subagent`, etc.).
+- Enforce strict role isolation: provide clear objectives and structured output schemas so sub-agents produce actionable outputs without overlapping. The orchestrator implements; sub-agents analyze, research, and critique unless an Implementation Specialist is explicitly dispatched.
+
+### 3. Adversarial Collaboration & Critique
+
+- Never let an implementation proceed without independent challenge.
+- When an implementation plan or code diff is produced, dispatch the **Devil's Advocate / Maintainer Critic** against the concrete diff or artifact.
+- Evaluate concrete failure modes: null/undefined states, race conditions, performance bottlenecks, and project style regressions.
+
+### 4. Synthesis & Dispute Resolution
+
+- Aggregate outputs using the methodology in [`references/synthesis-and-dispute.md`](references/synthesis-and-dispute.md).
+- Resolve contradictions:
+  - For competing root-cause hypotheses, run an empirical test or inspect the specific lines.
+  - For architectural disputes, prefer simplicity and adherence to existing project precedents.
+- Enforce the **Three-Cycle Hard Limit**: If the Critic still rejects changes after 3 rounds, halt iteration and present structured decision options to the user.
+
+### 5. Verification & Structured Reporting
+
+- Execute local build, lint, and test suites to verify the integrated outcome.
+- Produce a clear, concise handoff report:
+  - **(a) What was accomplished**: Summary of changes and decisions.
+  - **(b) Sub-agents utilized**: Role names and brief outcome from each.
+  - **(c) Verified trade-offs & assumptions**: Key architectural calls made.
+  - **(d) Deferred work**: Any secondary cleanups noted for future follow-up.
+
+## How to Invoke Sub-Agents
+
+Adapt the dispatch call to your environment's native sub-agent tool while keeping the prompt contract and shared context intact:
+
+```text
 Task(
-  subagent_type="general" | "explore",
-  description="<short role label>",
+  subagent_type="general",
+  description="<Short Role Label>",
   prompt="""
-  ROLE: <role name>
-  GOAL: <specific objective>
-  CONTEXT: <shared task context, file paths, constraints>
-  OUTPUT: <expected format — bullets, diff, file:line list>
+  ROLE: <Role Name from references/role-catalog.md>
+  GOAL: <Specific objective>
+  
+  SHARED CONTEXT:
+  TASK: <Verbatim task requirements>
+  SCOPE: <Target directories or files>
+  CONSTRAINTS: <Language, conventions, performance criteria>
+  ACCEPTANCE CRITERIA: <Definition of done>
+  
+  OUTPUT FORMAT: <Follow schema defined in references/role-catalog.md>
   """
 )
 ```
 
-If your platform uses a different tool name (e.g., `spawn_agent`), keep the **role content** identical and adapt only the envelope. The three-role structure and shared context are the contract; the tool name is not.
-
-**Shared context block** (send to every agent, once):
-
-```
-TASK: <original task verbatim>
-SCOPE: <files/dirs in play>
-CONSTRAINTS: <project conventions, style, deadlines>
-ACCEPTANCE CRITERIA: <how to know it's done>
-```
+For complete runtime envelope specifications (OpenCode, Claude Code, Antigravity/Gemini), see [`references/orchestration-protocol.md`](references/orchestration-protocol.md).
 
 ## Instructions
 
-- **Provide full context to each agent.** Don't make them re-derive what you already know. Paste the shared context block verbatim.
-- **Keep roles non-overlapping.** If two agents produce the same work, the decomposition was wrong — refine the brief.
-- **Run independent agents in parallel.** Use a single turn with multiple tool calls for the parallel dispatch, then synthesize in the next turn.
-- **Preserve the reviewer's independence.** The Critic/Maintainer agent should run **against the real diff or final plan**, not the issue description. Hold it back until there is something concrete to review.
-- **Loop at most three rounds.** If the Critic still rejects after three implement→review cycles, escalate to the user instead of iterating indefinitely.
+- **Default to rigor:** Parallelize discovery, hold back judgment until there is a diff, and never ship without a critic.
+- **Provide complete context up front**: Never force sub-agents to guess repository root, conventions, or constraints. Paste the shared context block into every dispatch.
+- **Maintain role separation**: If two agents produce identical work, refine their briefs to eliminate overlap.
+- **Dispatch in parallel**: Independent agents must be dispatched concurrently in a single turn, not sequentially.
+- **Hold back the critic**: The Critic / Reviewer must evaluate a concrete plan or real code diff, never a vague idea.
+- **Budget tokens effectively**: Avoid dumping entire multi-thousand-line files into prompts; pass exact paths and line ranges.
 
 ## Constraints
 
-- Do NOT spawn sub-agents without a clear role and expected output — "go help with this" is not a brief
-- Do NOT run sub-agents sequentially when they are independent — parallel dispatch saves time
-- Do NOT ignore a sub-agent's finding — address or explicitly defer each point
-- Do NOT skip the final review pass, even when sub-agents agree
-- Do NOT use multi-agents for trivial one-file edits where a single pass is faster — match tooling to task complexity
+- Do NOT dispatch sub-agents with vague, open-ended instructions ("go investigate this repo").
+- Do NOT run independent sub-agents sequentially when parallel dispatch is supported.
+- Do NOT ignore findings from specialized agents; explicitly address or document trade-offs.
+- Do NOT loop past 3 review cycles. Escalate persistent architectural disagreements to the user.
+- Do NOT spawn unnecessary roles for trivial single-file edits where a direct pass is faster and lower-risk.
+- Do NOT lose rigor if sub-agent tools are unavailable in the host runtime; execute sequential virtual roles per [`references/failure-recovery.md`](references/failure-recovery.md).
 
 ## Examples
 
-### Example 1 — Complex feature
+### Example 1 — Complex Feature with Parallel Exploration
 
 > **User**: "Add CSV export to `src/export/` — use multi-agents."
 
-**Agent**:
-1. Analyzes: independent work — research existing export patterns, implement CSV, update docs
-2. Spawns in parallel:
-   - Researcher: finds `src/export/json.ts` as prior art, notes table-driven test in `export.test.ts`
-   - Risk agent: flags large-file streaming, delimiter escaping, UTF-8 BOM
-3. Implements `csv.ts` using Researcher's pattern, handles Risk agent's edge cases
-4. Critic reviews the diff, flags missing doc update → agent adds `docs/api.md` entry
-5. Reports: what changed, which agents were used, assumptions (comma delimiter default), unfinished (Excel BOM deferred as follow-up)
+1. **Decomposition**: Identifies independent workstreams (research existing exporters vs. risk/streaming analysis).
+2. **Parallel Dispatch**:
+   - *Codebase Researcher*: Identifies `src/export/json.ts` pattern, notes table-driven tests in `export.test.ts`.
+   - *Performance & Risk Analyst*: Identifies memory limits with large datasets, flags delimiter escaping and UTF-8 BOM.
+3. **Implementation**: Implements `csv.ts` following `json.ts` idioms, incorporating streaming and escaping guards.
+4. **Adversarial Review**: Maintainer Critic reviews the diff, flags missing documentation in `docs/api.md`.
+5. **Synthesis & Handoff**: Documentation updated, tests pass, delivered with structured report.
 
-### Example 2 — Bug fix with devil's advocate
+### Example 2 — Bug Fix with Devil's Advocate
 
 > **User**: "Fix the auth bypass in `src/auth/` — run multi-agents with a devil's advocate."
 
-**Agent**:
-1. Spawns Root-Cause Analyst (reproduces bypass, traces to `auth.ts:42`) and Codebase Researcher (finds `auth.test.ts`, `CONTRIBUTING.md` auth conventions) in parallel
-2. Implements fix based on both outputs
-3. Devil's-advocate reviewer challenges: "Does this break the `guest` role? What about cached sessions?" → agent adds regression tests for both cases
-4. Reports with explicit assumption log
+1. **Parallel Dispatch**:
+   - *Root-Cause Analyst*: Reproduces bypass, isolates flaw to missing role check in `auth.ts:42`.
+   - *Codebase Researcher*: Locates `auth.test.ts` fixture suite and project authentication conventions.
+2. **Implementation**: Implements targeted guard in `auth.ts:42`.
+3. **Devil's Advocate**: Challenges the diff: "Does this invalidate active guest sessions? What about cached JWTs?"
+4. **Refinement**: Implementer adds regression tests confirming guest sessions and token revocation behavior.
+5. **Handoff**: Passes test suite, reports verified assumptions.
 
-### Example 3 — Research-only orchestration
+### Example 3 — Research-Only Fan-Out
 
-> **User**: "Use multi-agents to explore how `internal/billing/` works before we refactor."
+> **User**: "Use multi-agents to explore `internal/billing/` before refactor."
 
-**Agent**:
-1. Spawns three explore sub-agents in parallel:
-   - Agent A: maps `internal/billing/` files and responsibilities
-   - Agent B: traces billing data flow from API → DB
-   - Agent C: audits test coverage and flags gaps
-2. Synthesizes into a single briefing doc, notes contradictory findings, and recommends next steps
+1. Dispatches 3x `general` sub-agents in one turn, all with the Shared Context Block:
+   - (A) file map and responsibilities, (B) API-to-DB data flow, (C) test coverage audit.
+2. Synthesizes into a briefing doc with `CODEBASE RESEARCH` schemas; flags contradiction A vs B via an empirical re-read of the exact lines.
+3. Critic verdict: `ESCALATE — billing retry path undocumented, recommend spike before refactor.`
+
+### Example 4 — Single-Agent Virtual Role Fallback
+
+> **User**: "Analyze `internal/billing/` before refactoring." (Environment lacks sub-agent spawning tool)
+
+1. Follows [`references/failure-recovery.md`](references/failure-recovery.md) solo fallback protocol.
+2. Wears *Analyst Hat*: Maps module dependencies and database interactions.
+3. Wears *Researcher Hat*: Audits test coverage and identifies undocumented coupling.
+4. Wears *Critic Hat*: Challenges refactoring assumptions and highlights high-risk migration paths.
+5. Synthesizes findings into an architectural brief.
 
 ## References
 
-- This skill is designed to be portable across agent platforms — adapt the `Task` tool envelope to your runtime
-- Pairs with `contribute` (contribute workflow delegates to this skill in steps 7 and 10) and `code-review` (reviewer role can use that checklist)
+- [`references/role-catalog.md`](references/role-catalog.md) — Comprehensive catalogue of agent role prompts, objectives, and output schemas.
+- [`references/orchestration-protocol.md`](references/orchestration-protocol.md) — Parallel dispatch mechanics, shared context blocks, and runtime envelopes.
+- [`references/synthesis-and-dispute.md`](references/synthesis-and-dispute.md) — Reconciliation methodology, conflict resolution matrix, and escalation protocol.
+- [`references/failure-recovery.md`](references/failure-recovery.md) — Remediation for sub-agent timeouts, hallucinated code, and single-agent virtual role execution.
+- Integrates directly with [`skills/contribute`](../contribute/SKILL.md) and [`skills/code-review`](../code-review/SKILL.md).

@@ -32,10 +32,18 @@ This document explains the architecture of the **agents-skills** repository, why
 │   │   └── references/
 │   │       ├── ecosystem-detection.md
 │   │       ├── human-voice.md
+│   │       ├── issue-intake.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
 │   └── multi-agents/
-│       └── SKILL.md
+│       ├── SKILL.md
+│       └── references/
+│           ├── failure-recovery.md
+│           ├── orchestration-protocol.md
+│           ├── role-catalog.md
+│           └── synthesis-and-dispute.md
+├── scripts/
+│   └── validate-skills.py       # Automated skill validation test suite
 └── docs/
     └── architecture.md          # This file
 ```
@@ -118,12 +126,15 @@ The updated `contribute` skill implements an **autonomous 12-step contribution p
 11. **Commit, Push, and Open PR**: Formats commit message, pushes to fork, drafts maintainer-friendly PR description using [`pr-template.md`](../skills/contribute/references/pr-template.md), and applies tone and authenticity calibration from [`human-voice.md`](../skills/contribute/references/human-voice.md) to avoid generic AI-sounding boilerplate.
 12. **Handoff**: Summarizes the contribution and returns the PR link.
 
-### The 4 Stopping Checkpoints
-The skill only stops and asks the user in 4 specific situations:
-1. Uncommitted local changes in the repository clone.
-2. No local clone found on disk (confirms cloning location).
-3. Step 4 finds an existing merged or high-quality open PR already resolving the issue.
-4. Step 10 review loop does not converge after three rounds of changes.
+### Stopping Checkpoints
+The skill runs autonomously and pauses to consult the user ONLY at designated checkpoints:
+1. Rendered browser intake gate fails (missing browser capability, auth wall, unreadable media)
+2. Uncommitted local changes detected in the repository clone
+3. No local clone found on disk (confirms cloning target directory)
+4. Git identity (`user.name` / `user.email`) is unconfirmed or not clearly the real submitter
+5. Step 4 discovers an existing merged or active pull request already resolving the issue
+6. Step 10 maintainer review loop does not converge after 3 rounds
+7. Step 11 Human Voice Gate still fails after 3 rewrite attempts
 
 ### Reference Resources for `contribute`
 
@@ -131,10 +142,22 @@ The `contribute` skill delegates detailed templates, toolchain matrices, and ton
 
 | Reference Document | Purpose | Used In |
 |---|---|---|
+| [`issue-intake.md`](../skills/contribute/references/issue-intake.md) | Rendered browser intake protocol, visual asset inspection, and intake artifact | Steps 3 & 4 |
 | [`ecosystem-detection.md`](../skills/contribute/references/ecosystem-detection.md) | Language-to-toolchain mapping for builds, tests, and linters | Steps 5 & 9 |
 | [`multi-agent-brief.md`](../skills/contribute/references/multi-agent-brief.md) | Prompts and roles (Analyst, Researcher, Reviewer) for sub-agent delegation | Steps 7 & 10 |
 | [`pr-template.md`](../skills/contribute/references/pr-template.md) | Structured template for pull request descriptions | Step 11 |
 | [`human-voice.md`](../skills/contribute/references/human-voice.md) | Anti-AI boilerplate blocklist, project tone matching, and authentic phrasing guide | Step 11 & Public Comments |
+
+### Reference Resources for `multi-agents`
+
+The `multi-agents` skill packages enterprise-grade sub-agent orchestration protocols in `skills/multi-agents/references/`:
+
+| Reference Document | Purpose | Used In |
+|---|---|---|
+| [`role-catalog.md`](../skills/multi-agents/references/role-catalog.md) | Standardized role templates, system prompts, and strict output schemas | Phase 1 & Phase 2 |
+| [`orchestration-protocol.md`](../skills/multi-agents/references/orchestration-protocol.md) | Cross-runtime dispatch envelopes, parallel dispatch mechanics, and context budgeting | Phase 2 |
+| [`synthesis-and-dispute.md`](../skills/multi-agents/references/synthesis-and-dispute.md) | Dispute resolution matrix, empirical testing, and user escalation rules | Phase 3 & Phase 4 |
+| [`failure-recovery.md`](../skills/multi-agents/references/failure-recovery.md) | Sub-agent timeouts, hallucination detection, and sequential virtual role fallback | Recovery & Solo Mode |
 
 ---
 

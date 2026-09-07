@@ -6,33 +6,29 @@ no `/multi-agents` brief until the intake artifact at the bottom of this file ex
 Why this gate exists: issue authors put decisive evidence outside plain text -
 annotated screenshots, drag-dropped images, GIF/video, log pastes, repro repos,
 CodeSandbox/StackBlitz links, live demos, sibling-repo references. A `gh issue view`
-or `web_fetch` dump silently drops most of that. The rendered page inside
-`ego-browser` is the record of truth; the CLI is only a structured complement.
+or `web_fetch` dump silently drops most of that. The rendered page in browser intake
+is the record of truth; the CLI is only a structured complement.
 
-## 1. Invoke ego-browser (required, every run)
+## 1. Invoke browser intake (required, every run)
 
-Load the `ego-browser` skill the way this environment does it (slash-command,
-Skill tool, or `ego-browser nodejs` heredoc per its SKILL.md). Adapt only the
-invocation format to the real interface - never the content bar below.
+Load the browser tool the way your environment provides it:
+- **`ego-browser`**: slash-command, Skill tool, or `ego-browser nodejs` heredoc:
+  ```bash
+  ego-browser nodejs <<'EOF'
+  const task = await useOrCreateTaskSpace('contribute-issue-<number>')
+  cliLog('task space id: ' + task.id)
+  await openOrReuseTab('<issue-or-pr-url>', { wait: true, timeout: 30 })
+  cliLog(await snapshotText())
+  EOF
+  ```
+- **Agent Browser Subagent / Playwright / Puppeteer**:
+  Navigate to `<issue-or-pr-url>`, wait for network idle, capture the complete rendered DOM, expand collapsed comments/reviews, and inspect all attached visual assets.
 
-```bash
-ego-browser nodejs <<'EOF'
-const task = await useOrCreateTaskSpace('contribute-issue-<number>')
-cliLog('task space id: ' + task.id)
-await openOrReuseTab('<issue-or-pr-url>', { wait: true, timeout: 30 })
-cliLog(await snapshotText())
-EOF
-```
+Keep reusing the SAME browser task space or session for the issue page, every candidate PR page, and every external link in this intake. Do not open a new space per link. Close scratch tabs as you go; keep the issue tab until step 4 is done.
 
-Keep reusing the SAME task space for the issue page, every candidate PR page,
-and every external link in this intake. Do not open a new space per link.
-Close scratch tabs as you go; keep the issue tab until step 4 is done.
-`completeTaskSpace` runs only when the whole contribution is handed off, not
-after intake.
+Attempt a rendered read first, every run. CLI-only is permitted only as a logged exception after a failed rendered attempt: record the attempted method, the exact error, and an explicit `VISUALS: UNVERIFIED` flag in the intake artifact. Never infer `VISUALS: NONE` from CLI text alone, since collapsed threads, sidebars, and media never come through cleanly as text.
 
-If the skill is missing, the CLI errors, login blocks a private repo, or the
-page will not render: STOP. Report the exact error and what unblocks it, and
-wait. Do not continue on a CLI-only read.
+If no browser tool can launch, private authentication fails, or the page will not render even via fallback: STOP. Report the exact error and what is needed to unblock it (e.g., enabling browser subagent, authenticating credentials, or supplying the rendered issue thread), and wait. Do not downgrade to a silent CLI-only read to stay moving.
 
 ## 2. Full-thread capture checklist
 
@@ -108,7 +104,7 @@ incomplete read.
 Produce this block before leaving intake. Steps 6-7 consume it verbatim:
 
 ```text
-INTAKE - <issue-or-pr-url> (rendered via ego-browser, <date>)
+INTAKE - <issue-or-pr-url> (rendered via browser intake [method: ego-browser / browser-subagent], <date>)
 TITLE: <verbatim>
 STATE/LABELS: <open/closed + labels + assignees>
 THREAD: <N comments read to footer; maintainer direction quoted verbatim>
@@ -116,7 +112,8 @@ PROBLEM: <1-3 sentences: symptom, repro, acceptance bar>
 VISUALS (<n> found, <n> opened):
 - <asset 1: what it shows, key transcribed text>
 - <asset 2: ...>
-- (or: NONE - no images/video in body or comments)
+- (or: NONE - verified rendered, no images/video in body or comments)
+- (or: UNVERIFIED - rendered attempt failed, method + error logged, CLI text alone cannot prove absence)
 EXTERNAL LINKS (<n> found, <n> opened):
 - <url 1: what it is, loads Y/N, one fact it contributes>
 - (or: NONE)
@@ -129,9 +126,9 @@ direction and error strings; one-line summaries for everything else.
 
 ## 7. Stop conditions (do not work around these)
 
-- ego-browser unavailable / page unrenders / auth wall -> stop, report, wait.
+- Browser intake unavailable / page unrenders / auth wall -> stop, report, wait. Log method tried and exact error.
 - Visuals or repro link unreadable and material to the bug -> mark UNREADABLE/DEAD,
   flag in GAPS, and if the issue is uninterpretable without it, ask the user
   before burning step 7 cycles on a guess.
 - Never mark intake done after `gh issue view` alone, after the first viewport
-  without scrolling, or with unopened images/links still on the list.
+  without scrolling, or with unopened images/links still on the list. Never write `VISUALS: NONE` unless a rendered pass confirmed it; otherwise write `VISUALS: UNVERIFIED`.
