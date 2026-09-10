@@ -2,6 +2,7 @@
 
 This file is **blocking**. Read it fully before you write any public text:
 PR title, PR description, issue comment, review reply, commit message body.
+It also covers every chat reply and explanation to the user.
 Then read 5 recent merged PRs in this repo and match them.
 If you skip either step, do not push. Fix the text first.
 
@@ -80,9 +81,12 @@ matching the repo wins. Otherwise the ban stands.
 
 ## Rule 3: banned punctuation and structure (the "--" problem)
 
-This is the fastest way PRs get flagged. Fix all of these:
+This is the fastest way PRs get flagged, and the fastest way a chat reply
+reads as AI. It applies to everything you write: public text plus every
+comment and explanation to the user. Any em dash anywhere reads as AI.
 
-- **No em dash (—) in prose. Ever.** Not one. GPT models use it at 4 to 6x
+- **No em dash (—) in any output. Ever.** Not one. Not in PR text, not in
+  comments, not in chat explanations. GPT models use it at 4 to 6x
   the human rate, so maintainers now treat it as a signature. Use a comma,
   a period, or a colon instead. Hyphens stay only inside real compound
   words (well-known, non-empty) and code (`--config`, `--verbose` in backticks
@@ -152,7 +156,8 @@ What it never needs: a tour of every file touched.
 
 ## Rule 6: self-check before you push (run this every time)
 
-Run these literally. All must pass:
+Run these literally. All must pass. Run them on PR text and on any
+comment or chat explanation you are about to send:
 
 ```bash
 # 1. No em/en dashes in the draft itself (backticked --flag in code is fine)
@@ -174,7 +179,8 @@ Then check by eye:
 - [ ] Title names one thing, under ~60 chars, same casing as merged PRs.
 - [ ] Body is as short as the diff allows (tiny = 1 to 2 sentences).
 - [ ] At least one contraction in anything over 2 sentences.
-- [ ] Zero em dashes, zero "--" pauses, zero triple-adjective stacks.
+- [ ] Zero em dashes, zero "--" pauses, zero triple-adjective stacks, in PR
+  text and in chat replies alike.
 - [ ] Proof line present: command + result, not "ran the full suite".
 - [ ] `Closes #N` present once for PR descriptions; skipped for replies and comments unless closing an issue.
 - [ ] No headers, checklists, or emoji unless the repo template demands them.
