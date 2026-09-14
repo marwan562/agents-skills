@@ -22,6 +22,7 @@ Goals:
 | [**contribution**](skills/contribution/SKILL.md) | [`skills/contribution/`](skills/contribution/) | Guide contributors specifically through *this* repository's (`agents-skills`) workflow |
 | [**contribute**](skills/contribute/SKILL.md) | [`skills/contribute/`](skills/contribute/) | Autonomous 12-step open-source contribution pipeline (issue → PR) for *any* repo, host, and language |
 | [**multi-agents**](skills/multi-agents/SKILL.md) | [`skills/multi-agents/`](skills/multi-agents/) | Orchestrate complex tasks through parallel sub-agent collaboration (research, implement, review) |
+| [**multi-tenant**](skills/multi-tenant/SKILL.md) | [`skills/multi-tenant/`](skills/multi-tenant/) | Design secure multi-tenant AI agent platforms with strict tenant isolation for data, execution, and billing |
 
 > Each skill lives in its own directory under `skills/` and contains a single `SKILL.md` (and optional `references/` for extensive templates). This makes skills independently installable and versionable.
 
@@ -77,6 +78,7 @@ npx skills add marwan562/agents-skills --skill documentation
 npx skills add marwan562/agents-skills --skill contribution
 npx skills add marwan562/agents-skills --skill contribute
 npx skills add marwan562/agents-skills --skill multi-agents
+npx skills add marwan562/agents-skills --skill multi-tenant
 ```
 
 Browse and install visually at: `https://skills.sh/marwan562/agents-skills`
@@ -125,6 +127,8 @@ Skills are loaded automatically by compatible agents when the task matches the s
 > Here's the next issue: https://github.com/owner/repo/issues/42 — use contribute
 
 > Use multi-agents to break this refactor into parallel workstreams
+
+> Use multi-tenant to design tenant isolation for our agent SaaS
 ```
 
 **When a skill triggers, the agent:**
@@ -203,13 +207,20 @@ description: Clear trigger description for the agent
 │   │       ├── issue-intake.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
-│   └── multi-agents/
+│   ├── multi-agents/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── failure-recovery.md
+│   │       ├── orchestration-protocol.md
+│   │       ├── role-catalog.md
+│   │       └── synthesis-and-dispute.md
+│   └── multi-tenant/
 │       ├── SKILL.md
 │       └── references/
-│           ├── failure-recovery.md
-│           ├── orchestration-protocol.md
-│           ├── role-catalog.md
-│           └── synthesis-and-dispute.md
+│           ├── data-isolation.md
+│           ├── execution-isolation.md
+│           ├── stateful-services.md
+│           └── operations.md
 ├── scripts/
 │   └── validate-skills.py
 └── docs/
