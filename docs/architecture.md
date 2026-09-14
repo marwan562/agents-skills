@@ -35,13 +35,20 @@ This document explains the architecture of the **agents-skills** repository, why
 │   │       ├── issue-intake.md
 │   │       ├── multi-agent-brief.md
 │   │       └── pr-template.md
-│   └── multi-agents/
+│   ├── multi-agents/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── failure-recovery.md
+│   │       ├── orchestration-protocol.md
+│   │       ├── role-catalog.md
+│   │       └── synthesis-and-dispute.md
+│   └── multi-tenant/
 │       ├── SKILL.md
 │       └── references/
-│           ├── failure-recovery.md
-│           ├── orchestration-protocol.md
-│           ├── role-catalog.md
-│           └── synthesis-and-dispute.md
+│           ├── data-isolation.md
+│           ├── execution-isolation.md
+│           ├── stateful-services.md
+│           └── operations.md
 ├── scripts/
 │   └── validate-skills.py       # Automated skill validation test suite
 └── docs/
