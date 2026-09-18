@@ -153,6 +153,7 @@ The `contribute` skill delegates detailed templates, toolchain matrices, and ton
 | [`ecosystem-detection.md`](../skills/contribute/references/ecosystem-detection.md) | Language-to-toolchain mapping for builds, tests, and linters | Steps 5 & 9 |
 | [`multi-agent-brief.md`](../skills/contribute/references/multi-agent-brief.md) | Prompts and roles (Analyst, Researcher, Reviewer) for sub-agent delegation | Steps 7 & 10 |
 | [`pr-template.md`](../skills/contribute/references/pr-template.md) | Structured template for pull request descriptions | Step 11 |
+| [`jev-decisions.md`](../skills/contribute/references/jev-decisions.md) | Optional calibrated Jev gates (typed questions, thresholds, learning log) | Steps 4, 7 & 10 |
 | [`human-voice.md`](../skills/contribute/references/human-voice.md) | Anti-AI boilerplate blocklist, project tone matching, and authentic phrasing guide | Step 11 & Public Comments |
 
 ### Reference Resources for `multi-agents`

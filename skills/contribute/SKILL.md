@@ -132,6 +132,10 @@ to run through every time:**
 - **`code-review`** - lends its correctness/security/maintainability/performance/testing
   checklist to the Senior Maintainer Reviewer role in step 10, so the review has real
   structure behind it instead of a vague "looks fine."
+- **`jev-decisions`** (`references/jev-decisions.md`) - optional calibrated gate for
+  steps 4, 7, and 10. Typed probabilities with thresholds instead of a chatty
+  "looks good". Never writes code, never replaces tests. Skipped entirely when
+  no Jev key is configured.
 - **`documentation`** - for a change that touches public APIs, config, or commands, keeps
   README/CHANGELOG/API docs in sync with the diff instead of leaving them stale.
 - **`project-architecture`** - for a cross-cutting or large-feature issue, works out module
@@ -213,6 +217,9 @@ the rendered context from step 3 - not title search alone:
     stalled or was rejected (maintainer review comments are the ground truth here), and
     carry that reasoning into the brief in step 7 so the new attempt doesn't repeat it.
   - **Nothing found** - proceed normally.
+- **Optional Jev gate:** if a Jev key is configured, run Gate A from
+  `references/jev-decisions.md` on the candidate-PR evidence. It advises only;
+  the branches above still decide.
 
 ### 5. Learn the project's own conventions before touching code
 Read whatever exists, in priority order: `CONTRIBUTING.md` / `.github/CONTRIBUTING.md`,
@@ -254,6 +261,9 @@ instead of generic. In short, the default roles:
 Hand each agent the issue/PR content from step 3, the related-work findings from step 4
 (especially any rejected prior approach to avoid repeating), and the conventions from
 step 5 directly - they shouldn't have to re-fetch what's already gathered.
+- **Optional Jev gate:** if a Jev key is configured, run Gate B from
+  `references/jev-decisions.md` on the analysis. Implement only when it passes;
+  otherwise loop the roles once, then escalate instead of coding on a guess.
 
 ### 8. Implement
 Using Agent A's root cause and Agent B's research as the spec, make the change. Keep the
@@ -276,6 +286,11 @@ cleanliness, commit hygiene, whether it actually closes the issue as scoped, and
 maintainer would flag (missing docs, breaking-change risk, unhandled edge cases). Loop
 steps 8 -> 10 until it passes or you hit three rounds; if it still isn't converging, stop
 and bring the disagreement to the user instead of pushing something unresolved.
+- **Optional Jev gate:** if a Jev key is configured, run Gate C from
+  `references/jev-decisions.md` on the diff + test results BEFORE the reviewer
+  loop. `approve` goes to the reviewer; `revise` fixes and re-asks once;
+  `escalate` or low confidence stops. The reviewer role and the three-round cap
+  still apply on every path.
 
 ### 11. Commit, push, and open the PR - automatically, but never past the Voice Gate
 
@@ -480,4 +495,6 @@ they may not know they're missing.
   including where step 4's related-work findings go.
 - `references/ecosystem-detection.md` - language/build-tool detection and command lookup
   for steps 5 and 9.
+- `references/jev-decisions.md` - optional Jev calibrated gates for steps 4, 7, 10:
+  typed questions, thresholds, provider priority, and the decision-log learning loop.
 - `references/pr-template.md` - PR description template for step 11.
