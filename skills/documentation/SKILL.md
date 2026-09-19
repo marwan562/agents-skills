@@ -85,6 +85,10 @@ Errors: 400 validation, 401 unauthorized
 - Remove or fix stale sections you discovered in step 2
 - Leave a maintenance note where docs are likely to drift ("Source: `src/routes.ts:18-45` — update here if routes change")
 - If the repo has a docs linter or link checker, run it
+- Optional Jev gate (skipped without `JEV_API_KEY`): send the doc diff +
+  source facts to `jev_review`. Full protocol:
+  [contribute Jev gates](../contribute/references/jev-decisions.md). Never
+  send secrets.
 
 ## Instructions
 

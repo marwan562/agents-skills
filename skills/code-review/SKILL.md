@@ -85,6 +85,13 @@ For each finding, include:
 
 Close with a **verdict**: `Approve` / `Approve with comments` / `Request changes` and a 2-3 line summary.
 
+### 8. Optional Jev rescore (skipped without `JEV_API_KEY`)
+
+When configured, send task+diff+files+test results to `jev_review`; fix the
+weakest important dimensions, re-run checks, rescore with
+`previousEvaluation`. The verdict above still decides. Never send secrets.
+Full protocol: [contribute Jev gates](../contribute/references/jev-decisions.md).
+
 ## Instructions
 
 - **Be specific and evidence-based.** Every finding must cite a location and explain the risk. Never emit vague "consider improving quality" without a concrete pointer.

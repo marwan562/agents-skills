@@ -159,6 +159,14 @@ for p in pathlib.Path('skills').glob('*/SKILL.md'):
 
 - If `gh` is not authenticated, instruct the user to run `gh auth login` and retry; do not fabricate a PR URL
 
+### 8. Optional Jev pre-PR check (skipped without `JEV_API_KEY`)
+
+When configured, send the `SKILL.md` diff + intent + validation results to
+`jev_review`; fix concrete flags, re-validate, rescore with
+`previousEvaluation`. `CONTRIBUTING.md` and the validator still decide. Never
+send secrets. Full protocol:
+[contribute Jev gates](../contribute/references/jev-decisions.md).
+
 ## Instructions
 
 - **Follow CONTRIBUTING.md first.** If this skill and CONTRIBUTING.md disagree, CONTRIBUTING.md wins — update this skill to match.
