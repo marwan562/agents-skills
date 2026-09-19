@@ -132,10 +132,11 @@ to run through every time:**
 - **`code-review`** - lends its correctness/security/maintainability/performance/testing
   checklist to the Senior Maintainer Reviewer role in step 10, so the review has real
   structure behind it instead of a vague "looks fine."
-- **`jev-decisions`** (`references/jev-decisions.md`) - optional calibrated gate for
-  steps 4, 7, and 10. Typed probabilities with thresholds instead of a chatty
-  "looks good". Never writes code, never replaces tests. Skipped entirely when
-  no Jev key is configured.
+- **`jev-decisions`** (`references/jev-decisions.md`) - optional `jev_review`
+  MCP gate for steps 4, 7, and 10. Scalar scores + confidence with
+  `previousEvaluation` deltas instead of a chatty "looks good". Never writes
+  code, never replaces tests. Skipped entirely when `JEV_API_KEY` is not
+  configured.
 - **`documentation`** - for a change that touches public APIs, config, or commands, keeps
   README/CHANGELOG/API docs in sync with the diff instead of leaving them stale.
 - **`project-architecture`** - for a cross-cutting or large-feature issue, works out module

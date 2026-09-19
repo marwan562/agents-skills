@@ -124,3 +124,7 @@ Do NOT trigger for single-user CLI tools, single-tenant prototypes with no share
 - [references/stateful-services.md](references/stateful-services.md) — Memory/vector, cache, queues, events.
 - [references/operations.md](references/operations.md) — Billing, rate limits, quotas, observability, audit, lifecycle, failures, testing matrix, security checklist, rollout order, Definition of Done.
 - Companion skills: `project-architecture` (module boundaries), `code-review` (diff audit), `documentation` (ADRs, runbooks).
+- Optional Jev gate (skipped without `JEV_API_KEY`): send the isolation
+  diff + negative-test results to `jev_review`. Full protocol:
+  [contribute Jev gates](../contribute/references/jev-decisions.md). Never
+  send secrets or tenant PII.

@@ -147,3 +147,7 @@ Alternatives: WebSockets (overkill for unidirectional), polling (higher latency)
 
 - Related skills: `documentation` (to capture ADRs), `code-review` (to evaluate against architecture)
 - Template for ADR: keep each ADR ≤ 10 lines in the design doc
+- Optional Jev gate (skipped without `JEV_API_KEY`): send modules +
+  dependencies + ADRs to `jev_review`. Details:
+  [contribute Jev gates](../contribute/references/jev-decisions.md). Never
+  send secrets.

@@ -80,6 +80,10 @@ Keywords: `multi-agent`, `orchestration`, `parallel`, `delegate`, `sub-agent`, `
 ### 5. Verification & Structured Reporting
 
 - Execute local build, lint, and test suites to verify the integrated outcome.
+- Optional Jev gate (skipped without `JEV_API_KEY`): send task + diff +
+  test results to `jev_review`, rescore after fixes with `previousEvaluation`.
+  The Critic verdict and three-cycle cap still decide. Never send secrets.
+  Full protocol: [`contribute Jev gates`](../contribute/references/jev-decisions.md).
 - Produce a clear, concise handoff report:
   - **(a) What was accomplished**: Summary of changes and decisions.
   - **(b) Sub-agents utilized**: Role names and brief outcome from each.
