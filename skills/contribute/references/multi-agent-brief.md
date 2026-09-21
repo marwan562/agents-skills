@@ -57,53 +57,53 @@ DETECTED PROJECT CONVENTIONS (From Step 5):
 - Branch Convention: <e.g., fix/123-short-slug>
 - Test Command: <e.g., cargo test / pytest / npm test>
 - Lint Command: <e.g., cargo clippy / ruff check / eslint>
-- Commit Style: <e.g., Conventional Commits (fix:, feat:)>
+- Commit Style: <e.g., Conventional Commits (fix:, feat:); see references/commit-discipline.md for one logical change per commit and single vs split calls>
 - Code Style Rules: <Key guidelines from CONTRIBUTING.md / style guides>
 ```
 
 ---
 
 ### Role 1: Root-Cause Analyst
-- **Goal:** Reproduce the defect or precisely isolate the functional gap for a feature request.
-- **Scope:** Trace the execution path to the exact offending lines of code.
-- **Constraints:** Diagnose only; do not write the final fix yet.
+- **Goal:** Reproduce the defect or precisely isolate the functional gap using the Red-Green testing discipline.
+- **Scope:** Trace the execution path to the exact offending lines and produce a minimal reproducing test snippet.
+- **Constraints:** Diagnose only; do not write the final application fix yet.
 - **Prompt:**
   ```text
   ROLE: Root-Cause Analyst
-  GOAL: Trace the exact root cause of issue #<issue-number> down to specific files and line numbers.
+  GOAL: Trace the exact root cause of issue #<issue-number> down to specific files, line numbers, and provide a failing reproduction case.
   CONTEXT:
   <Shared Context Block>
   OUTPUT EXPECTED:
-  1. Reproduction steps / Root-cause explanation.
+  1. Minimal Reproduction Case (Red State): a standalone test function or reproduction script that fails for the exact reported reason.
   2. Offending file paths and line number ranges (file:line).
-  3. Failure mechanics: why does the current code fail or behave unexpectedly?
+  3. Failure mechanics: why does the current code fail or behave unexpectedly? Which invariant was violated?
   ```
 
 ---
 
 ### Role 2: Codebase & Convention Researcher
 - **Goal:** Deep-search the target repository for related files, prior art, relevant test files, and local idioms.
-- **Scope:** Identify all files that need modification and the test harness to extend.
-- **Constraints:** Focus on codebase patterns, existing tests, and maintainer standards.
+- **Scope:** Identify all files that need modification and the exact test harness and file where the regression test belongs.
+- **Constraints:** Focus on codebase patterns, existing test structures, and maintainer standards.
 - **Prompt:**
   ```text
   ROLE: Codebase & Convention Researcher
-  GOAL: Find all files that must be touched, identify relevant existing tests, and extract project-specific implementation idioms.
+  GOAL: Find all files that must be touched, locate the exact test file/suite to extend, and extract project-specific implementation idioms.
   CONTEXT:
   <Shared Context Block>
   OUTPUT EXPECTED:
-  1. Files that will need modification or creation.
-  2. Existing test files and patterns covering this area.
+  1. Application files that will need modification or creation.
+  2. Target test file, fixture patterns, and harness conventions where the new regression test should live.
   3. Precedent / Prior Art: similar PRs or existing helper functions to reuse.
-  4. Project-specific idioms or constraints to follow.
+  4. Project-specific idioms, type safety conventions, and architectural constraints to follow.
   ```
 
 ---
 
 ### Role 3: Senior Maintainer Reviewer (Held for Step 10)
 - **Goal:** Review the actual proposed diff against this project's real maintainer standards and acceptance criteria.
-- **Scope:** Correctness, test coverage, edge cases, regression risk, style/lint adherence, commit hygiene.
-- **Constraints:** Review the concrete git diff, not the prompt or general idea.
+- **Scope:** Correctness, test coverage, edge cases, regression risk, style/lint adherence, commit hygiene, and performance.
+- **Constraints:** Review the concrete git diff, not the prompt or general idea. Cite commit-pinned permalinks per references/permalink-evidence.md.
 - **Prompt:**
   ```text
   ROLE: Senior Maintainer Reviewer
@@ -114,7 +114,8 @@ DETECTED PROJECT CONVENTIONS (From Step 5):
   <git diff content>
   OUTPUT EXPECTED:
   - Verdict: [APPROVE | REQUEST_CHANGES]
-  - Blocking Issues (if any) with file:line and exact fix required
+  - Blocking Issues (if any) with commit-pinned permalink or file:line and exact fix required
+  - Edge cases checked: null/nil values, boundary conditions, concurrency/races, resource cleanup
   - Non-blocking suggestions / nits
   - Verification check: Does this diff completely solve issue #<issue-number> without regression?
   ```

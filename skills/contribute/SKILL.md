@@ -1,6 +1,6 @@
 ---
 name: contribute
-description: Use this skill to contribute via GitHub/GitLab/Gitea issue/PR links — fixing bugs, implementing features. Triggers on "start this issue", "pick up this ticket", contributions dir, or open-PR requests. Uses ego-browser intake and multi-agents review before push.
+description: Use this skill to contribute via GitHub/GitLab/Gitea issue/PR links (fixing bugs, implementing features). Triggers on "start this issue", "pick up this ticket", contributions dir, or open-PR requests. Uses ego-browser intake and multi-agents review before push.
 ---
 
 # Contribute
@@ -161,8 +161,7 @@ here - don't hardcode to whichever project you saw last.
   comes.
 - Detect the real default branch (`main`, `master`, `develop`, ...) - don't assume `main`.
   `git fetch` the right remote, check out the default branch, pull.
-- If there are uncommitted local changes, **stop and ask** rather than stashing - that
-  work may matter to the user.
+- If there are uncommitted local changes, **stop and ask** rather than stashing: that work may matter to the user. Alternatively, work in an isolated `git worktree` (`git worktree add -b fix/<issue> ../<repo>-worktrees/fix-<issue> <default-branch>`) so work proceeds immediately in a clean directory without touching the user's uncommitted files.
 
 ### 3. Read the issue or PR (BLOCKING - browser intake only)
 Run this inside browser intake per `references/issue-intake.md` (`/ego-browser` preferred, browser subagent fallback). Do not start it via
@@ -248,48 +247,44 @@ subagents never re-derive or silently drop what the browser already proved. Read
 including where the step 4 findings go, and a worked example so the roles come out sharp
 instead of generic. In short, the default roles:
 
-1. **Root-Cause Analyst** - reproduces the bug (or nails the exact functional gap for a
-   feature ask) and traces it to the actual responsible lines. Diagnoses; doesn't fix yet.
-2. **Codebase & Convention Researcher** - deep-searches the repo for the files the fix
-   will touch, prior art (similar past PRs/commits), the conventions gathered in step 5,
-   and which existing tests already cover this area.
-3. **Senior Maintainer Reviewer** - held back until step 10; reviews a real diff, not the
-   issue. Simulates a maintainer of *this specific project*, applying the same
-   correctness/security/maintainability/performance/testing lens as the `code-review`
-   skill (use it directly if it's available) against the actual stated standards from
-   step 5, rather than generic best practice.
+1. **Root-Cause Analyst** - isolates the defect and creates a minimal failing reproduction test case or script (Red state). Diagnoses and proves the failure mechanics down to specific files and line numbers; does not write the final application fix yet.
+2. **Codebase & Convention Researcher** - deep-searches the repo for the files the fix will touch, prior art (similar past PRs/commits), the conventions gathered in step 5, and the exact test harness where the reproduction test belongs.
+3. **Senior Maintainer Reviewer** - held back until step 10; reviews a real diff, not the issue. Simulates a maintainer of *this specific project*, applying the same correctness/security/maintainability/performance/testing lens as the `code-review` skill (use it directly if it's available) against the actual stated standards from step 5, rather than generic best practice.
 
-Hand each agent the issue/PR content from step 3, the related-work findings from step 4
-(especially any rejected prior approach to avoid repeating), and the conventions from
-step 5 directly - they shouldn't have to re-fetch what's already gathered.
-- **Optional Jev gate:** if a Jev key is configured, run Gate B from
-  `references/jev-decisions.md` on the analysis. Implement only when it passes;
-  otherwise loop the roles once, then escalate instead of coding on a guess.
+Hand each agent the issue/PR content from step 3, the related-work findings from step 4 (especially any rejected prior approach to avoid repeating), and the conventions from step 5 directly: they shouldn't have to re-fetch what's already gathered.
+- **Optional Jev gate:** if a Jev key is configured, run Gate B from `references/jev-decisions.md` on the analysis. Implement only when it passes; otherwise loop the roles once, then escalate instead of coding on a guess.
 
-### 8. Implement
-Using Agent A's root cause and Agent B's research as the spec, make the change. Keep the
-diff as small as the issue actually requires - note unrelated cleanup opportunities
-separately instead of folding them in. Act like a senior earning trust, not a beginner
-proving range: one issue, one minimal fix, existing patterns reused. If this is your first
-contribution to this repo, prefer the smallest scope that truly closes the issue over a
-wider refactor, even when the refactor looks tempting.
+### 8. Implement (Red-Green-Refactor)
+Using Agent A's reproduction test and Agent B's codebase research as the spec:
+- **Red:** Run the reproduction test case to verify it fails cleanly on untouched code for the exact reported reason.
+- **Green:** Implement the minimal fix to satisfy the test and make the suite pass. Keep the diff as small as the issue actually requires: note unrelated cleanup opportunities separately instead of folding them in. Act like a senior earning trust, not a beginner proving range: one issue, one minimal fix, existing patterns reused.
+- **Refactor:** Clean up internal structure, adhere to local idioms, and ensure no regressions without expanding scope.
+
+Commit while you work per `references/commit-discipline.md`, not once at the end. Each finished slice (fix plus its test, docs that belong to that slice) becomes a local commit right after its slice checks pass. Group related files together. If the whole fix is one idea in one or two files, keep it as one commit. Do not split one logical fix into micro-commits to look busy.
 
 ### 9. Verify locally
 Run the project's actual test/lint/build commands (from step 5 /
 `references/ecosystem-detection.md`), never assumed generic ones. Add or update a test for
 the change - a fix with no accompanying test is one of the most common reasons maintainers
-request changes. Re-run the full suite, not just the new test, to catch regressions.
+request changes. Verify each slice before its local commit per
+`references/commit-discipline.md` section 4 (`git status --short`, staged diff review,
+slice tests and lint, no secrets, identity check). Re-run the full suite, not just the new
+test, before step 11, to catch regressions.
 
 ### 10. Maintainer-style review
 Send the real diff (not the plan) to the Senior Maintainer Reviewer role from step 7. Have
 it check, against this project's own conventions: correctness, test coverage, style/lint
-cleanliness, commit hygiene, whether it actually closes the issue as scoped, and anything a
+cleanliness, commit hygiene per `references/commit-discipline.md` (one logical change per
+commit, fix travels with its test, no unrelated cleanup folded in), whether it actually
+closes the issue as scoped, and anything a
 maintainer would flag (missing docs, breaking-change risk, unhandled edge cases). Every
 finding that points at code must cite a commit-pinned permalink per
 `references/permalink-evidence.md`, never a bare `path:line` on the default branch.
 Loop
 steps 8 -> 10 until it passes or you hit three rounds; if it still isn't converging, stop
-and bring the disagreement to the user instead of pushing something unresolved.
+and bring the disagreement to the user instead of pushing something unresolved. Each
+review round that changes code becomes a new local commit on the same branch, never a
+silent amend, so the maintainer can see what moved since their last look.
 - **Optional Jev gate:** if a Jev key is configured, run Gate C from
   `references/jev-decisions.md` on the diff + test results BEFORE the reviewer
   loop. `approve` goes to the reviewer; `revise` fixes and re-asks once;
@@ -313,12 +308,16 @@ unless the repo template forces them), medium (repo headers only). Never more
 bullet lines than changed lines. When the text points at code, use a commit-pinned
 permalink plus a short verbatim snippet per `references/permalink-evidence.md`.
 Write in B2 casual English with at least one
-contraction in anything over 2 sentences. Zero em dashes (—), zero en dashes (–)
-as pauses, zero bare `--` pauses in prose. Backticked flags like `--config` are
+contraction in anything over 2 sentences. Zero em dashes or en dashes as pauses,
+zero bare `--` pauses in prose. Backticked flags like `--config` are
 fine; English pauses are not.
-- **11.2 Commit message per the project's own convention** (Conventional Commits -
-`fix: ...` / `feat: ...` - by default, unless step 5 turned up something else).
-Keep the subject to one thing, short, same casing as merged PRs.
+- **11.2 Commit per `references/commit-discipline.md`.** Message per the project's own convention
+(Conventional Commits - `fix: ...` / `feat: ...` - by default, unless step 5 turned up
+something else). One logical change per commit, related files grouped: fix travels with
+its test, docs travel with the behavior they describe. Single commit stays when the whole
+fix is one idea; split into 2 to 3 commits only when parts deserve separate review.
+Keep the subject to one thing, short, same casing as merged PRs. Never squash distinct
+ideas into one commit to save time, never split one fix into micro-commits.
 - **11.3 Run the Voice Gate self-check** from `references/human-voice.md` Rule 6
 literally (banned-word grep, banned-phrase grep, dash grep, plus the eye checklist:
 one-thing title, length matches diff, contraction present, proof line with real
@@ -326,11 +325,12 @@ command and result, `Closes #N` once for PR descriptions (skipped for replies an
 comments unless closing an issue), no headers/checklists/emoji unless the repo
 template demands them). Rewrite until every check passes. A failing draft does not
 get pushed "and fixed later".
-- **11.4 Confirm the git identity first.** Check `git config --get user.name` /
+- **11.4 Confirm the git identity and signing first.** Check `git config --get user.name` /
 `git config --get user.email` in this clone. It must resolve to the actual person
 submitting the contribution, not a default identity a coding-agent install may have
-set globally. If it isn't clearly a real person's identity, stop and ask rather than
-guessing or silently overwriting it.
+set globally. If `git config --get commit.gpgsign` is enabled, preserve commit signing
+cleanly without bypassing. If identity isn't clearly a real person's identity, stop and
+ask rather than guessing or silently overwriting it.
 - **11.5 Never add a "Co-authored-by," "Generated by," or similar signature crediting an AI tool
 to the commit or PR body unless the project's own CONTRIBUTING.md or PR template
 explicitly asks for that disclosure. If it does ask, answer it honestly - don't leave the
@@ -338,9 +338,11 @@ field blank or mark it false to get past a policy written specifically to catch 
 Absent an explicit ask, the commit should just read as the submitting contributor's own
 work, because the review, testing, and judgment behind it were theirs.
 - **11.6 Push and open the PR only after 11.0 to 11.3 pass.** Once step 10 passes and
-the Voice Gate passes, push to the user's fork (the one confirmed or created back in
-step 2) and open the PR without waiting for a further go-ahead - that's what end-to-end
-automation means here. Draft the PR description from `references/pr-template.md`, filled
+the Voice Gate passes, push the local commit stack to the user's fork (the one confirmed
+or created back in step 2) and open the PR without waiting for a further go-ahead - that's
+what end-to-end automation means here. Push every local commit as is. Do not squash or
+force-push during review. If the maintainer requests a squash at merge time, let the platform
+perform it. Draft the PR description from `references/pr-template.md`, filled
 in with what actually changed, how it was tested, `Closes #<issue-number>` (or whatever
 phrasing this project's own template used in step 5), and a mention of any stale/rejected
 prior attempt from step 4 if one existed. The same gate covers every follow-up push and
@@ -360,8 +362,9 @@ rewrites. A rejected voice draft never gets pushed to "fix later".
 Give CI a few minutes and check it once (`gh pr checks --watch` or the platform
 equivalent) before calling this done - not to babysit it through days of human review, but
 because a red build from something the local run in step 9 couldn't catch (a CI-only lint
-rule, an OS or version you don't have locally) is worth one honest look, and one follow-up
-commit if the fix is quick, rather than leaving the user to discover it later. If it's
+rule, an OS or version you don't have locally) is worth one honest look, and one new
+follow-up commit on the same branch if the fix is quick, rather than leaving the user to
+discover it later. Never amend an already pushed commit to hide the fix. If it's
 still red after that look, or just slow to start, don't loop on it - note the status in
 the summary and move on.
 
@@ -377,11 +380,13 @@ These keep your PR mergeable. They guard review time, not just code.
 - **Do NOT interrupt the user for routine decisions.** File naming, helper extraction, and test placement are your responsibility. Pause ONLY at the explicit checkpoints.
 - **Do NOT open competing PRs** if step 4 finds an existing active or merged PR that resolves the problem.
 - **Do NOT cite a bare `path:line` on the default branch in public text** (`references/permalink-evidence.md`). Pin it to a commit SHA and quote the lines verbatim, after verifying the SHA exists.
-- **Do NOT push unverified code.** Always execute the project's actual build, lint, and test suites (`references/ecosystem-detection.md`) before pushing.
+- **Do NOT push unverified code.** Always execute the project's actual build, lint, and test suites (`references/ecosystem-detection.md`) before pushing. Verify each local commit per `references/commit-discipline.md` section 4.
+- **Do NOT dump unrelated work into one commit or split one fix into micro-commits** (`references/commit-discipline.md`). One logical change per commit, committed while you work. Single commit stays for tiny fixes.
+- **Do NOT amend or force-push after publishing.** Review-round and CI fixes are new commits on the same branch. If a squash is requested at merge time, let the platform perform it.
 - **Do NOT add AI disclosure signatures** ("Co-authored-by: AI", "Generated by...") unless the target repository's `CONTRIBUTING.md` or PR template explicitly mandates it.
 - **Do NOT guess git author identity.** Always verify `git config user.name` and `user.email` represent the authentic contributor before committing.
 - **Do NOT touch or stash uncommitted changes** in the user's local clone without explicit confirmation.
-- **Done means:** tests and lint pass locally, one new or updated test covers the fix, Voice Gate Rule 6 passes, PR links `Closes #N` once, CI gets one check in step 12.
+- **Done means:** tests and lint pass locally, one new or updated test covers the fix, commit stack follows `references/commit-discipline.md` (related work grouped, each commit verified), Voice Gate Rule 6 passes, PR links `Closes #N` once, CI gets one check in step 12.
 
 ## Checkpoints (the only points that stop and ask)
 
@@ -450,7 +455,8 @@ part; everything else is discovered fresh on every run.
    at the existing test pattern in `test/Route.js`.
 5. Implements the guard, adds a test, runs the suite and linter, sends the diff through the
    Reviewer role - approved on the first pass.
-6. Commits, pushes to the fork, opens the PR from the template, watches CI turn green, and
+6. Commits the fix plus its test as one local commit (single idea, so no split),
+   pushes to the fork, opens the PR from the template, watches CI turn green, and
    hands off with a three-line summary and the PR link.
 
 Every decision here, from branch name to commit message, was already answered by the
@@ -489,6 +495,9 @@ they may not know they're missing.
 
 ## Reference files
 
+- `references/commit-discipline.md` - commit-while-you-work protocol for steps 8-11:
+  one logical change per commit, when one commit is enough versus 2 to 3, staging and
+  message format, no amend or force-push after publishing. Read before the first code change.
 - `references/issue-intake.md` - BLOCKING intake protocol for steps 3-4: how to drive
   browser intake (task space, full-thread scroll, visual-asset handling, external-URL
   handling), the intake artifact shape, and the stop-conditions. Read before opening
