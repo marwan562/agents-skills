@@ -274,22 +274,35 @@ proving range: one issue, one minimal fix, existing patterns reused. If this is 
 contribution to this repo, prefer the smallest scope that truly closes the issue over a
 wider refactor, even when the refactor looks tempting.
 
+Commit while you work per `references/commit-discipline.md`, not once at the end. Each
+finished slice (fix plus its test, docs that belong to that slice) becomes a local commit
+right after its slice checks pass. Group related files together. If the whole fix is one
+idea in one or two files, keep it as one commit. Do not split one logical fix into
+micro-commits to look busy.
+
 ### 9. Verify locally
 Run the project's actual test/lint/build commands (from step 5 /
 `references/ecosystem-detection.md`), never assumed generic ones. Add or update a test for
 the change - a fix with no accompanying test is one of the most common reasons maintainers
-request changes. Re-run the full suite, not just the new test, to catch regressions.
+request changes. Verify each slice before its local commit per
+`references/commit-discipline.md` section 4 (`git status --short`, staged diff review,
+slice tests and lint, no secrets, identity check). Re-run the full suite, not just the new
+test, before step 11, to catch regressions.
 
 ### 10. Maintainer-style review
 Send the real diff (not the plan) to the Senior Maintainer Reviewer role from step 7. Have
 it check, against this project's own conventions: correctness, test coverage, style/lint
-cleanliness, commit hygiene, whether it actually closes the issue as scoped, and anything a
+cleanliness, commit hygiene per `references/commit-discipline.md` (one logical change per
+commit, fix travels with its test, no unrelated cleanup folded in), whether it actually
+closes the issue as scoped, and anything a
 maintainer would flag (missing docs, breaking-change risk, unhandled edge cases). Every
 finding that points at code must cite a commit-pinned permalink per
 `references/permalink-evidence.md`, never a bare `path:line` on the default branch.
 Loop
 steps 8 -> 10 until it passes or you hit three rounds; if it still isn't converging, stop
-and bring the disagreement to the user instead of pushing something unresolved.
+and bring the disagreement to the user instead of pushing something unresolved. Each
+review round that changes code becomes a new local commit on the same branch, never a
+silent amend, so the maintainer can see what moved since their last look.
 - **Optional Jev gate:** if a Jev key is configured, run Gate C from
   `references/jev-decisions.md` on the diff + test results BEFORE the reviewer
   loop. `approve` goes to the reviewer; `revise` fixes and re-asks once;
@@ -316,9 +329,13 @@ Write in B2 casual English with at least one
 contraction in anything over 2 sentences. Zero em dashes (—), zero en dashes (–)
 as pauses, zero bare `--` pauses in prose. Backticked flags like `--config` are
 fine; English pauses are not.
-- **11.2 Commit message per the project's own convention** (Conventional Commits -
-`fix: ...` / `feat: ...` - by default, unless step 5 turned up something else).
-Keep the subject to one thing, short, same casing as merged PRs.
+- **11.2 Commit per `references/commit-discipline.md`.** Message per the project's own convention
+(Conventional Commits - `fix: ...` / `feat: ...` - by default, unless step 5 turned up
+something else). One logical change per commit, related files grouped: fix travels with
+its test, docs travel with the behavior they describe. Single commit stays when the whole
+fix is one idea; split into 2 to 3 commits only when parts deserve separate review.
+Keep the subject to one thing, short, same casing as merged PRs. Never squash distinct
+ideas into one commit to save time, never split one fix into micro-commits.
 - **11.3 Run the Voice Gate self-check** from `references/human-voice.md` Rule 6
 literally (banned-word grep, banned-phrase grep, dash grep, plus the eye checklist:
 one-thing title, length matches diff, contraction present, proof line with real
@@ -338,9 +355,10 @@ field blank or mark it false to get past a policy written specifically to catch 
 Absent an explicit ask, the commit should just read as the submitting contributor's own
 work, because the review, testing, and judgment behind it were theirs.
 - **11.6 Push and open the PR only after 11.0 to 11.3 pass.** Once step 10 passes and
-the Voice Gate passes, push to the user's fork (the one confirmed or created back in
-step 2) and open the PR without waiting for a further go-ahead - that's what end-to-end
-automation means here. Draft the PR description from `references/pr-template.md`, filled
+the Voice Gate passes, push the local commit stack to the user's fork (the one confirmed
+or created back in step 2) and open the PR without waiting for a further go-ahead - that's
+what end-to-end automation means here. Push every local commit as is; do not squash and
+do not force-push during review unless the maintainer explicitly asks. Draft the PR description from `references/pr-template.md`, filled
 in with what actually changed, how it was tested, `Closes #<issue-number>` (or whatever
 phrasing this project's own template used in step 5), and a mention of any stale/rejected
 prior attempt from step 4 if one existed. The same gate covers every follow-up push and
@@ -360,8 +378,9 @@ rewrites. A rejected voice draft never gets pushed to "fix later".
 Give CI a few minutes and check it once (`gh pr checks --watch` or the platform
 equivalent) before calling this done - not to babysit it through days of human review, but
 because a red build from something the local run in step 9 couldn't catch (a CI-only lint
-rule, an OS or version you don't have locally) is worth one honest look, and one follow-up
-commit if the fix is quick, rather than leaving the user to discover it later. If it's
+rule, an OS or version you don't have locally) is worth one honest look, and one new
+follow-up commit on the same branch if the fix is quick, rather than leaving the user to
+discover it later. Never amend an already pushed commit to hide the fix. If it's
 still red after that look, or just slow to start, don't loop on it - note the status in
 the summary and move on.
 
@@ -377,11 +396,13 @@ These keep your PR mergeable. They guard review time, not just code.
 - **Do NOT interrupt the user for routine decisions.** File naming, helper extraction, and test placement are your responsibility. Pause ONLY at the explicit checkpoints.
 - **Do NOT open competing PRs** if step 4 finds an existing active or merged PR that resolves the problem.
 - **Do NOT cite a bare `path:line` on the default branch in public text** (`references/permalink-evidence.md`). Pin it to a commit SHA and quote the lines verbatim, after verifying the SHA exists.
-- **Do NOT push unverified code.** Always execute the project's actual build, lint, and test suites (`references/ecosystem-detection.md`) before pushing.
+- **Do NOT push unverified code.** Always execute the project's actual build, lint, and test suites (`references/ecosystem-detection.md`) before pushing. Verify each local commit per `references/commit-discipline.md` section 4.
+- **Do NOT dump unrelated work into one commit or split one fix into micro-commits** (`references/commit-discipline.md`). One logical change per commit, committed while you work. Single commit stays for tiny fixes.
+- **Do NOT amend or force-push after publishing.** Review-round and CI fixes are new commits on the same branch. Squash only when the maintainer explicitly asks.
 - **Do NOT add AI disclosure signatures** ("Co-authored-by: AI", "Generated by...") unless the target repository's `CONTRIBUTING.md` or PR template explicitly mandates it.
 - **Do NOT guess git author identity.** Always verify `git config user.name` and `user.email` represent the authentic contributor before committing.
 - **Do NOT touch or stash uncommitted changes** in the user's local clone without explicit confirmation.
-- **Done means:** tests and lint pass locally, one new or updated test covers the fix, Voice Gate Rule 6 passes, PR links `Closes #N` once, CI gets one check in step 12.
+- **Done means:** tests and lint pass locally, one new or updated test covers the fix, commit stack follows `references/commit-discipline.md` (related work grouped, each commit verified), Voice Gate Rule 6 passes, PR links `Closes #N` once, CI gets one check in step 12.
 
 ## Checkpoints (the only points that stop and ask)
 
@@ -450,7 +471,8 @@ part; everything else is discovered fresh on every run.
    at the existing test pattern in `test/Route.js`.
 5. Implements the guard, adds a test, runs the suite and linter, sends the diff through the
    Reviewer role - approved on the first pass.
-6. Commits, pushes to the fork, opens the PR from the template, watches CI turn green, and
+6. Commits the fix plus its test as one local commit (single idea, so no split),
+   pushes to the fork, opens the PR from the template, watches CI turn green, and
    hands off with a three-line summary and the PR link.
 
 Every decision here, from branch name to commit message, was already answered by the
@@ -489,6 +511,9 @@ they may not know they're missing.
 
 ## Reference files
 
+- `references/commit-discipline.md` - commit-while-you-work protocol for steps 8-11:
+  one logical change per commit, when one commit is enough versus 2 to 3, staging and
+  message format, no amend or force-push after publishing. Read before the first code change.
 - `references/issue-intake.md` - BLOCKING intake protocol for steps 3-4: how to drive
   browser intake (task space, full-thread scroll, visual-asset handling, external-URL
   handling), the intake artifact shape, and the stop-conditions. Read before opening
