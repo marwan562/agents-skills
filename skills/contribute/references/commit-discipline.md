@@ -86,6 +86,7 @@ git diff --staged
 # Go: go test ./<pkg>/... && go vet ./<pkg>/...
 # Rust: cargo test -p <crate> && cargo clippy -p <crate> -- -D warnings
 # Python: uv run pytest <touched> -q && uv run ruff check <touched>
+# Docs/skills repos: run the repo validator when it exists (for example `python3 scripts/validate-skills.py`) plus a relative-link check
 git config --get user.name
 git config --get user.email
 ```
