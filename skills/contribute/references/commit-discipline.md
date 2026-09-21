@@ -126,17 +126,18 @@ Refs #241
 
 Two commits (fix first, docs second):
 
-```
+```text
 1. fix: reject empty --config instead of exiting 0
 2. docs: note empty --config error in CLI usage
 ```
 
 Three commits (medium work, review round visible):
 
-```
+```text
 1. fix: reject empty --config instead of exiting 0
-2. test: cover empty and whitespace --config cases
-3. docs: note empty --config error in CLI usage
+   (includes empty and whitespace --config regression tests)
+2. docs: note empty --config error in CLI usage
+3. fix: address review feedback on --config handling
 ```
 
 Bad splits to avoid: test committed apart from the fix it proves, formatting-only churn mixed into the fix, two issues sharing one commit message with "and".

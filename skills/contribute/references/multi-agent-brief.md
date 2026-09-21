@@ -57,7 +57,7 @@ DETECTED PROJECT CONVENTIONS (From Step 5):
 - Branch Convention: <e.g., fix/123-short-slug>
 - Test Command: <e.g., cargo test / pytest / npm test>
 - Lint Command: <e.g., cargo clippy / ruff check / eslint>
-- Commit Style: <e.g., Conventional Commits (fix:, feat:); see contribute references/commit-discipline.md for one logical change per commit and single vs split calls>
+- Commit Style: <e.g., Conventional Commits (fix:, feat:); see references/commit-discipline.md for one logical change per commit and single vs split calls>
 - Code Style Rules: <Key guidelines from CONTRIBUTING.md / style guides>
 ```
 
