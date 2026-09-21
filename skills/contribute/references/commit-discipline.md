@@ -83,20 +83,23 @@ git status --short
 git diff --staged
 # run the slice check, examples:
 # JS: pnpm vitest run <touched> && pnpm eslint <touched>
-# Go: go test ./<pkg>/... && go vet ./<pkg>/...
-# Rust: cargo test -p <crate> && cargo clippy -p <crate> -- -D warnings
+# Go: go test -race ./<pkg>/... && go vet ./<pkg>/...
+# Rust: cargo nextest run -p <crate> && cargo clippy -p <crate> -- -D warnings
 # Python: uv run pytest <touched> -q && uv run ruff check <touched>
 # Docs/skills repos: run the repo validator when it exists (for example `python3 scripts/validate-skills.py`) plus a relative-link check
 git config --get user.name
 git config --get user.email
+git config --get commit.gpgsign
 ```
 
 All must hold:
 
 - [ ] Staged diff contains one logical change only. Unrelated hunks are unstaged.
+- [ ] Red-Green verified: the regression test was confirmed to fail before the fix and passes now.
 - [ ] Slice tests and lint for touched files pass. Full suite passes before push (step 9).
 - [ ] No secrets, tokens, `.env` content, or private URLs in the diff.
 - [ ] Identity resolves to the real submitter. If not, stop and ask per SKILL.md step 11.4.
+- [ ] Commit signing preserved: if `commit.gpgsign` is true, sign cleanly without bypassing.
 - [ ] Message follows section 3. Voice Gate Rule 6 passes on the message body.
 
 If any box fails, fix it before committing. Do not commit red code to "fix later".

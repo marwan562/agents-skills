@@ -40,11 +40,16 @@ git fetch upstream
 │   ├── contribute/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   │       ├── commit-discipline.md
 │   │       ├── ecosystem-detection.md
 │   │       ├── human-voice.md
+│   │       ├── issue-intake.md
+│   │       ├── jev-decisions.md
 │   │       ├── multi-agent-brief.md
+│   │       ├── permalink-evidence.md
 │   │       └── pr-template.md
-│   └── multi-agents/SKILL.md
+│   ├── multi-agents/SKILL.md
+│   └── multi-tenant/SKILL.md
 └── docs/
     └── architecture.md
 ```
